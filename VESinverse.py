@@ -35,13 +35,18 @@ FLTR2 = [0., .000238935, .00011557, .00017034, .00024935,
 # 65 is completely arbitrary
 ARRAYSIZE = 65
 
+# Input
+INDEX = 2       # 1 is for shchlumberger and 2 is for Wenner
+e = 3           #number of layers
+n = 2 * e - 1
+
 #I know there must be a better method to assign lists. And probably numpy
 #arrays would be best. But my Python wasn't up to it. If the last letter
 #is an 'l' that means it is a log10 of the value
 
 p = [0] * 20
 r = [0] * ARRAYSIZE
-RL = [0] * ARRAYSIZE
+rl = [0] * ARRAYSIZE
 t = [0] * 50
 b = [0] * ARRAYSIZE
 asav = [0] * ARRAYSIZE
@@ -74,18 +79,12 @@ u = [0] * 5000
 ndat = 13
 
 #hard coded data input - spacing and apparent resistivities measured
-#in teh field
+#in the field
 adat = [0., 0.55, 0.95, 1.5, 2.5, 3., 4.5, 5.5, 9., 12., 20., 30., 70.]
 rdat = [0., 125., 110., 95., 40., 24., 15., 10.5, 8., 6., 6.5, 11., 25.]
 one30 = 1.e30
 rms = one30
 errmin = 1.e10
-
-# INPUT
-index = 2   # 1 is for shchlumberger and 2 is for Wenner
-e = 3   #number of layers
-n = 2 * e - 1
-
 
 spac = 0.2 # smallest electrode spacing
 m = 20  # number of points where resistivity is calculated
@@ -133,9 +132,9 @@ def readData():
 def error():
     sumerror = 0.
     #pltanswer = [0] * 64
-    spline(m, one30, one30, asavl, RL, y2)
+    spline(m, one30, one30, asavl, rl, y2)
     for i in range(1, ndat, 1):
-        ans = splint(m, adatl[i], asavl, RL, y2)
+        ans = splint(m, adatl[i], asavl, rl, y2)
         sumerror = sumerror + (rdatl[i] - ans) * (rdatl[i] - ans)
         #print(i, sum1, rdat[i], rdatl[i], ans)
         pltanswerl[i] = ans
@@ -144,12 +143,13 @@ def error():
 
     # check the spline routine
 #    for i in range(1, m+1, 1):
-#        anstest = splint(m, asavl[i], asavl, RL, y2)
-#        print( asavl[i], RL[i], anstest)
+#        anstest = splint(m, asavl[i], asavl, rl, y2)
+#        print( asavl[i], rl[i], anstest)
     #print(' rms  =  ', rms)
 # if you erally want to get a good idea of all perdictions from Montecarlo
 # perform the following plot (caution - change iter to a smaller number)
     #plt.loglog(adat[1:ndat], pltanswer[1:ndat])
+
     return rms
 
 def transf(y, i):
@@ -176,14 +176,14 @@ def filters(b, k):
     return
 
 def rmsfit():
-    if index == 1:
+    if INDEX == 1:
         y = spac - 19. * delx - 0.13069
         mum1 = m + 28
         for i in range(1, mum1 + 1, 1):
             transf(y, i)
             y = y + delx
         filters(FLTR1, 29)
-    elif index == 2:
+    elif INDEX == 2:
         s = np.log(2.)
         y = spac-10.8792495 * delx
         mum2 = m + 33
@@ -205,7 +205,7 @@ def rmsfit():
         a = np.exp(x)
         asav[i] = a
         asavl[i] = np.log10(a)
-        RL[i] = np.log10(r[i])
+        rl[i] = np.log10(r[i])
         x = x + delx
         #print("%7.2f   %9.3f " % ( asav[i], r[i]))
 
@@ -294,7 +294,7 @@ if __name__ == '__main__':
                 pkeep[i] = p[i]
             for i in range(1, m+1, 1):
                 rkeep[i] = r[i]
-                rkeepl[i] = RL[i]
+                rkeepl[i] = rl[i]
             for i in range(1, ndat + 1, 1):
                 pltanswerkeepl[i] = pltanswerl[i]
                 pltanswerkeep[i] = pltanswer[i]
