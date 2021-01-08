@@ -119,6 +119,7 @@ xlarge[5] = 3000.
 
 iter = 10000  #number of iterations for the Monte Carlo guesses. to be input on GUI
 
+# function definitions
 def readData():
     #normally this is where the data would be read from the csv file
     # but now I'm just hard coding it in as global lists
@@ -273,7 +274,7 @@ def splint(n, x, xa=[], ya=[], y2a=[]):
     return y
 
 
-#main here
+# Main
 if __name__ == '__main__':
     # Seed the RNG so we don't have randomness while testing
     random.seed(0);
