@@ -82,9 +82,10 @@ u = [0] * 5000
 ndat = 13
 
 # Input
-INDEX = 2       # 1 is for shchlumberger and 2 is for Wenner
-# SHCHLUMBERGER = 1
-# WENNER = 2
+# INDEX = 2       # 1 is for shchlumberger and 2 is for Wenner
+algorithm_choice = 2
+SHCHLUMBERGER = 1
+WENNER = 2
 e = 3           #number of layers
 n = 2 * e - 1
 
@@ -129,31 +130,36 @@ xlarge[5] = 3000.
 
 iter = 10000  #number of iterations for the Monte Carlo guesses. to be input on GUI
 
+# GUI initialization
+mainwindow = Tk();
+mainwindow.title('VES Inverse Data Input')
+algorithm_index = IntVar(mainwindow, 1)
+frame = Frame(mainwindow)
+frame.pack()
+
 # function definitions
-# def openGUI():
-#     window = Tk();
-#     window.title('VES Inverse Data Input')
-#     window.mainloop()
+def openGUI():
+    topframe = Frame(mainwindow)
+    topframe.pack(side = TOP)
+
+    # radiobuttons to pick algorithm to be used
+    shch_rb = Radiobutton(topframe, text="Shchlumberger",
+                            variable = algorithm_index, value = 1,
+                            command = processMethod)
+    shch_rb.pack( side = LEFT )
+    wen_rb = Radiobutton(topframe, text="Wenner",
+                            variable = algorithm_index, value = 2,
+                            command = processMethod)
+    wen_rb.pack( side = RIGHT )
+    mainwindow.mainloop()
+
+def processMethod():
+    if algorithm_index.get() == 1:
+        algorithm_choice = 1
+    elif algorithm_index.get() == 2:
+        algorithm_choice = 2
 
 def readData():
-    # GUI initialization
-    window = Tk();
-    window.title('VES Inverse Data Input')
-    window.mainloop()
-
-    # frame1 = Frame(window)
-    # frame1.pack()
-
-    # self.index = IntVar()
-    # self.index.set(0)
-
-    # shch_rb = Radiobutton(frame1, text="Shchlumberger",
-    #                         variable = self.index, value = 1,
-    #                         command = self.processmethod)
-    # wen_rb = Radiobutton(frame1, text="Wenner",
-    #                         variable = self.index, value = 2,
-    #                         command = self.processmethod)
-
     #normally this is where the data would be read from the csv file
     # but now I'm just hard coding it in as global lists
     for i in range(1, ndat, 1):
@@ -212,14 +218,14 @@ def filters(b, k):
     return
 
 def rmsfit():
-    if INDEX == 1:
+    if algorithm_choice == SHCHLUMBERGER:
         y = spac - 19. * delx - 0.13069
         mum1 = m + 28
         for i in range(1, mum1 + 1, 1):
             transf(y, i)
             y = y + delx
         filters(FLTR1, 29)
-    elif INDEX == 2:
+    elif algorithm_choice == WENNER:
         s = np.log(2.)
         y = spac-10.8792495 * delx
         mum2 = m + 33
@@ -313,7 +319,7 @@ def splint(n, x, xa=[], ya=[], y2a=[]):
 if __name__ == '__main__':
     # Seed the RNG so we don't have randomness while testing
     random.seed(0)
-    # openGUI()
+    openGUI()
     readData()
     print(adat[1:ndat], rdat[1:ndat])
     for iloop in range(1, iter + 1, 1):
