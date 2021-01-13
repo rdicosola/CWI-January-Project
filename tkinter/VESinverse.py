@@ -19,7 +19,8 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 import sys
-
+# import tkinter
+# from tkinter import ttk
 from tkinter import *
 
 # Constants
@@ -82,6 +83,8 @@ ndat = 13
 
 # Input
 INDEX = 2       # 1 is for shchlumberger and 2 is for Wenner
+# SHCHLUMBERGER = 1
+# WENNER = 2
 e = 3           #number of layers
 n = 2 * e - 1
 
@@ -127,14 +130,39 @@ xlarge[5] = 3000.
 iter = 10000  #number of iterations for the Monte Carlo guesses. to be input on GUI
 
 # function definitions
+# def openGUI():
+#     window = Tk();
+#     window.title('VES Inverse Data Input')
+#     window.mainloop()
+
 def readData():
+    # GUI initialization
+    window = Tk();
+    window.title('VES Inverse Data Input')
+    window.mainloop()
+
+    # frame1 = Frame(window)
+    # frame1.pack()
+
+    # self.index = IntVar()
+    # self.index.set(0)
+
+    # shch_rb = Radiobutton(frame1, text="Shchlumberger",
+    #                         variable = self.index, value = 1,
+    #                         command = self.processmethod)
+    # wen_rb = Radiobutton(frame1, text="Wenner",
+    #                         variable = self.index, value = 2,
+    #                         command = self.processmethod)
+
     #normally this is where the data would be read from the csv file
     # but now I'm just hard coding it in as global lists
-
     for i in range(1, ndat, 1):
         adatl[i] = np.log10(adat[i])
         rdatl[i] = np.log10(rdat[i])
 
+    return
+
+def processmethod():
     return
 
 def error():
@@ -284,7 +312,8 @@ def splint(n, x, xa=[], ya=[], y2a=[]):
 # Main
 if __name__ == '__main__':
     # Seed the RNG so we don't have randomness while testing
-    random.seed(0);
+    random.seed(0)
+    # openGUI()
     readData()
     print(adat[1:ndat], rdat[1:ndat])
     for iloop in range(1, iter + 1, 1):
