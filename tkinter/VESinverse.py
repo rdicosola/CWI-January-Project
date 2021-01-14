@@ -15,16 +15,16 @@ GUI implementation additions Created Winter 2021
 """
 
 # Imports
+# import tkinter
+# from tkinter import ttk
+
+# Constants
+# Schlumberger filter
 import numpy as np
 import random
 import matplotlib.pyplot as plt
 import sys
-# import tkinter
-# from tkinter import ttk
 from tkinter import *
-
-# Constants
-# Schlumberger filter
 FLTR1 = [0., .00046256, -.0010907, .0017122, -.0020687,
          .0043048, -.0021236, .015995, .017065, .098105, .21918, .64722,
          1.1415, .47819, -3.515, 2.7743, -1.201, .4544, -.19427, .097364,
@@ -43,9 +43,9 @@ FLTR2 = [0., .000238935, .00011557, .00017034, .00024935,
 # 65 is completely arbitrary
 ARRAYSIZE = 65
 
-#I know there must be a better method to assign lists. And probably numpy
-#arrays would be best. But my Python wasn't up to it. If the last letter
-#is an 'l' that means it is a log10 of the value
+# I know there must be a better method to assign lists. And probably numpy
+# arrays would be best. But my Python wasn't up to it. If the last letter
+# is an 'l' that means it is a log10 of the value
 
 p = [0] * 20
 r = [0] * ARRAYSIZE
@@ -69,7 +69,7 @@ pltanswerkeepl = [0] * ARRAYSIZE
 small = [0] * ARRAYSIZE
 xlarge = [0] * ARRAYSIZE
 
-x=[0] * 100
+x = [0] * 100
 y = [0] * 100
 y2 = [0] * 100
 u = [0] * 5000
@@ -86,18 +86,18 @@ ndat = 13
 algorithm_choice = 2
 SHCHLUMBERGER = 1
 WENNER = 2
-e = 3           #number of layers
+e = 3  # number of layers
 n = 2 * e - 1
 
-#hard coded data input - spacing and apparent resistivities measured
-#in the field
+# hard coded data input - spacing and apparent resistivities measured
+# in the field
 adat = [0., 0.55, 0.95, 1.5, 2.5, 3., 4.5, 5.5, 9., 12., 20., 30., 70.]
 rdat = [0., 125., 110., 95., 40., 24., 15., 10.5, 8., 6., 6.5, 11., 25.]
 one30 = 1.e30
 rms = one30
 errmin = 1.e10
 
-spac = 0.2 # smallest electrode spacing
+spac = 0.2  # smallest electrode spacing
 m = 20  # number of points where resistivity is calculated
 
 spac = np.log(spac)
@@ -114,8 +114,8 @@ while fctr > 1.:
 # this is where the range in parameters should be input from a GUI
 # I'm hard coding this in for now
 
-#enter thickenss range for each layer and then resistivity range.
-#for 3 layers small[1] and small[2] are low end of thickness range
+# enter thickenss range for each layer and then resistivity range.
+# for 3 layers small[1] and small[2] are low end of thickness range
 # small[3], small[4] and small[5] are the low end of resistivities
 small[1] = 1.
 xlarge[1] = 5
@@ -128,39 +128,63 @@ xlarge[4] = 100
 small[5] = 500.
 xlarge[5] = 3000.
 
-iter = 10000  #number of iterations for the Monte Carlo guesses. to be input on GUI
+iter = 10000  # number of iterations for the Monte Carlo guesses. to be input on GUI
 
 # GUI initialization
-mainwindow = Tk();
+mainwindow = Tk()
 mainwindow.title('VES Inverse Data Input')
+mainwindow.configure(background="gainsboro")
+
 algorithm_index = IntVar(mainwindow, 1)
 frame = Frame(mainwindow)
 frame.pack()
 
 # function definitions
+
+
 def openGUI():
+    global algorithm_choice
+
+    label = Label(mainwindow, text="Input Data for Resistvity Survey")
+    label.pack(side=TOP)
+
     topframe = Frame(mainwindow)
-    topframe.pack(side = TOP)
+    topframe.pack(side=TOP)
 
     # radiobuttons to pick algorithm to be used
     shch_rb = Radiobutton(topframe, text="Shchlumberger",
-                            variable = algorithm_index, value = 1,
-                            command = processMethod)
-    shch_rb.pack( side = LEFT )
+                          variable=algorithm_index, value=1)
+    shch_rb.pack(side=LEFT)
     wen_rb = Radiobutton(topframe, text="Wenner",
-                            variable = algorithm_index, value = 2,
-                            command = processMethod)
-    wen_rb.pack( side = RIGHT )
+                         variable=algorithm_index, value=2)
+    wen_rb.pack(side=RIGHT)
+
     mainwindow.mainloop()
 
-def processMethod():
-    if algorithm_index.get() == 1:
+    # set algorithm to be used to the one picked
+    if (algorithm_index.get() == 1):
         algorithm_choice = 1
-    elif algorithm_index.get() == 2:
+    elif (algorithm_index.get() == 2):
         algorithm_choice = 2
 
+    return
+
+
+# def processMethod():
+#     global algorithm_choice
+#     if (algorithm_index.get() == 1):
+#         algorithm_choice = 1
+#         print(algorithm_index)
+#         print(algorithm_choice)
+#     elif (algorithm_index.get() == 2):
+#         algorithm_choice = 2
+#         print(algorithm_index)
+#         print(algorithm_choice)
+#     return
+
+
 def readData():
-    #normally this is where the data would be read from the csv file
+    # normally this is where the data would be read from the csv file
     # but now I'm just hard coding it in as global lists
     for i in range(1, ndat, 1):
         adatl[i] = np.log10(adat[i])
@@ -168,8 +192,6 @@ def readData():
 
     return
 
-def processmethod():
-    return
 
 def error():
     sumerror = 0.
@@ -194,6 +216,7 @@ def error():
 
     return rms
 
+
 def transf(y, i):
     u = 1. / np.exp(y)
     t[1] = p[n]
@@ -209,6 +232,7 @@ def transf(y, i):
     r[i] = t[e]
     return
 
+
 def filters(b, k):
     for i in range(1, m+1, 1):
         re = 0.
@@ -216,6 +240,7 @@ def filters(b, k):
             re = re + b[j] * r[i + k - j]
         r[i] = re
     return
+
 
 def rmsfit():
     if algorithm_choice == SHCHLUMBERGER:
@@ -259,39 +284,43 @@ def rmsfit():
 # use splint to determine the spline interpolated prediction at the
 # spacing where the measured resistivity was taken - to compare observation
 # to prediction
+
+
 def spline(n, yp1, ypn, x=[], y=[], y2=[]):
     u = [0] * 1000
     one29 = 0.99e30
     #print(x, y)
-    if  yp1 > one29:
+    if yp1 > one29:
         y2[0] = 0.
         u[0] = 0.
     else:
         y2[0] = -0.5
         u[0] = (3. / (x[1] - x[0])) * ((y[1] - y[0]) /
-                (x[1] - x[0]) - yp1)
+                                       (x[1] - x[0]) - yp1)
 
     for i in range(1, n):
         #print(i, x[i])
         sig = (x[i] - x[i - 1]) / (x[i + 1] - x[i - 1])
-        p=sig * y2[i - 1] +2.
+        p = sig * y2[i - 1] + 2.
         y2[i] = (sig - 1.) / p
         u[i] = ((6. * ((y[i + 1] - y[i]) / (x[i + 1] - x[i]) -
-                (y[i] - y[i - 1]) / (x[i] - x[i - 1])) /
-                (x[i + 1] - x[i - 1]) - sig * u [i - 1]) / p)
+                       (y[i] - y[i - 1]) / (x[i] - x[i - 1])) /
+                 (x[i + 1] - x[i - 1]) - sig * u[i - 1]) / p)
 
     if ypn > one29:
         qn = 0.
         un = 0.
     else:
         qn = 0.5
-        un = (3. / (x[n] - x[n - 1])) * (ypn - (y[n] - y[n-1]) / (x[n] - x[n - 1]))
+        un = (3. / (x[n] - x[n - 1])) * \
+            (ypn - (y[n] - y[n-1]) / (x[n] - x[n - 1]))
 
-    y2[n] = (un - qn * u[n - 1]) / (qn * y2[n - 1] +1.)
+    y2[n] = (un - qn * u[n - 1]) / (qn * y2[n - 1] + 1.)
     for k in range(n - 1, -1, -1):
         y2[k] = y2[k] * y2[k + 1] + u[k]
 
     return
+
 
 def splint(n, x, xa=[], ya=[], y2a=[]):
     klo = 0
@@ -306,10 +335,10 @@ def splint(n, x, xa=[], ya=[], y2a=[]):
     if abs(h) < 1e-20:
         print(" bad xa input")
     #print(x, xa[khi], xa[klo])
-    a = (xa[khi] - x)/ h
+    a = (xa[khi] - x) / h
     b = (x - xa[klo]) / h
     y = (a * ya[klo] + b * ya[khi] + ((a * a * a - a) * y2a[klo] +
-                (b * b * b - b) * y2a[khi]) * (h * h) / 6.)
+                                      (b * b * b - b) * y2a[khi]) * (h * h) / 6.)
     #print("x=   ", x,"y=  ", y, "  ya=  ", ya[khi],"  y2a=  ", y2a[khi], "  h=  ",h)
 
     return y
@@ -343,28 +372,29 @@ if __name__ == '__main__':
                 pltanswerkeep[i] = pltanswer[i]
             errmin = rms
 
-#output the best fitting earth model
+# output the best fitting earth model
     print(' Layer ', '     Thickness  ', '   Res_ohm-m  ')
     for i in range(1, e, 1):
         print(i, pkeep[i], pkeep[e + i - 1])
 
-    print( e, '  Infinite ', pkeep[n])
+    print(e, '  Infinite ', pkeep[n])
     for i in range(1, m + 1, 1):
         asavl[i] = np.log10(asav[i])
 
-#output the error of fit
-    print( ' RMS error   ', errmin)
-    print( '  Spacing', '  Res_pred  ', ' Log10_spacing  ', ' Log10_Res_pred ')
+# output the error of fit
+    print(' RMS error   ', errmin)
+    print('  Spacing', '  Res_pred  ', ' Log10_spacing  ', ' Log10_Res_pred ')
     for i in range(1, m + 1, 1):
         #print(asav[i], rkeep[i], asavl[i], rkeepl[i])
-        print("%7.2f   %9.3f  %9.3f  %9.3f" % ( asav[i], rkeep[i],
-              asavl[i], rkeepl[i]))
+        print("%7.2f   %9.3f  %9.3f  %9.3f" % (asav[i], rkeep[i],
+                                               asavl[i], rkeepl[i]))
 
     plt.loglog(asav[1:m], rkeep[1:m], '-')  # resistivity prediction curve
-    plt.loglog(adat[1:ndat], pltanswerkeep[1:ndat], 'ro')  # predicted data red dots
+    plt.loglog(adat[1:ndat], pltanswerkeep[1:ndat],
+               'ro')  # predicted data red dots
     s = 7
-    plt.loglog(adat[1:ndat], rdat[1:ndat], 'bo', markersize=s) #original data blue dots
+    plt.loglog(adat[1:ndat], rdat[1:ndat], 'bo',
+               markersize=s)  # original data blue dots
     plt.show()
     plt.grid(True)
     sys.exit(0)
-
