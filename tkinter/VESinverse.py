@@ -82,31 +82,9 @@ u = [0] * 5000
 algorithm_choice = 2
 SHCHLUMBERGER = 1
 WENNER = 2
-layers_choice = 2  # number of layers
+layers_choice = 0  # number of layers
 n = 2 * layers_choice - 1
-
-# hard coded data input - spacing and apparent resistivities measured
-# in the field
-adat = [0., 0.55, 0.95, 1.5, 2.5, 3., 4.5, 5.5, 9., 12., 20., 30., 70.]
-rdat = [0., 125., 110., 95., 40., 24., 15., 10.5, 8., 6., 6.5, 11., 25.]
-ndat = 13
-one30 = 1.e30
-rms = one30
-errmin = 1.e10
-
-spac = 0.2  # smallest electrode spacing
-m = 20  # number of points where resistivity is calculated
-
-spac = np.log(spac)
-delx = np.log(10.0) / 6.
-
-# these lines apparently find the computer precision ep
-ep = 1.0
-ep = ep / 2.0
-fctr = ep + 1.
-while fctr > 1.:
-    ep = ep / 2.0
-    fctr = ep + 1.
+iter = 0  # number of iterations for the Monte Carlo guesses. to be input on GUI
 
 # this is where the range in parameters should be input from a GUI
 # I'm hard coding this in for now
@@ -125,7 +103,28 @@ xlarge[4] = 100
 small[5] = 500.
 xlarge[5] = 3000.
 
-iter = 10000  # number of iterations for the Monte Carlo guesses. to be input on GUI
+# hard coded data input - spacing and apparent resistivities measured
+# in the field
+ndat = 0
+adat = [0., 0.55, 0.95, 1.5, 2.5, 3., 4.5, 5.5, 9., 12., 20., 30., 70.]
+rdat = [0., 125., 110., 95., 40., 24., 15., 10.5, 8., 6., 6.5, 11., 25.]
+one30 = 1.e30
+rms = one30
+errmin = 1.e10
+
+spac = 0.2  # smallest electrode spacing
+m = 20  # number of points where resistivity is calculated
+
+spac = np.log(spac)
+delx = np.log(10.0) / 6.
+
+# these lines apparently find the computer precision ep
+ep = 1.0
+ep = ep / 2.0
+fctr = ep + 1.
+while fctr > 1.:
+    ep = ep / 2.0
+    fctr = ep + 1.
 
 # GUI initialization
 mainwindow = Tk()
@@ -138,12 +137,16 @@ frame.pack()
 # variables used for GUI
 algorithm_index = IntVar(mainwindow, 1)
 num_layers = IntVar(mainwindow, 1)
+num_iter = IntVar(mainwindow)
+num_datapoints = IntVar(mainwindow)
 
 # function definitions
 def openGUI():
     global algorithm_choice
     global layers_choice
     global n
+    global iter
+    global ndat
 
     # full window label
     label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
@@ -164,15 +167,32 @@ def openGUI():
     secondframe = Frame(mainwindow, background="gainsboro")
     secondframe.pack(side=TOP, anchor=NW)
     label = Label(secondframe, bg="gainsboro", font=("TkDefaultFont", 10),
-                  text="Number of Layers")
+                  text="Number of Layers (layers_choice)")
     label.pack(side=LEFT)
     layerlist = [
         1, 2, 3, 4, 5
     ]
-    #num_layers.set(layerlist[0])
     layersmenu = OptionMenu(secondframe, num_layers, *layerlist)
     layersmenu.config(bg="gainsboro")
     layersmenu.pack(side=RIGHT)
+
+    # box to enter number of iterations
+    thirdframe = Frame(mainwindow, background="gainsboro")
+    thirdframe.pack(side=TOP, anchor=NW)
+    label = Label(thirdframe, bg="gainsboro", font=("TkDefaultFont", 10),
+                  text="Number of Iterations (iter)")
+    label.pack(side=LEFT)
+    iterentry = Entry(thirdframe, textvariable=num_iter)
+    iterentry.pack(side=RIGHT)
+
+    # box to enter number of data points
+    fourthframe = Frame(mainwindow, background="gainsboro")
+    fourthframe.pack(side=TOP, anchor=NW)
+    label = Label(fourthframe, bg="gainsboro", font=("TkDefaultFont", 10),
+                  text="Number of Data Points (ndat)")
+    label.pack(side=LEFT)
+    ndatentry = Entry(fourthframe, textvariable=num_datapoints)
+    ndatentry.pack(side=RIGHT)
 
     mainwindow.mainloop()
 
@@ -183,21 +203,13 @@ def openGUI():
     layers_choice = num_layers.get()
     n = 2 * layers_choice - 1
 
+    # set number of iterations
+    iter = num_iter.get()
+
+    # set number of data points
+    ndat = num_datapoints.get()
+
     return
-
-
-# def processMethod():
-#     global algorithm_choice
-#     if (algorithm_index.get() == 1):
-#         algorithm_choice = 1
-#         print(algorithm_index)
-#         print(algorithm_choice)
-#     elif (algorithm_index.get() == 2):
-#         algorithm_choice = 2
-#         print(algorithm_index)
-#         print(algorithm_choice)
-#     return
-
 
 def readData():
     # normally this is where the data would be read from the csv file
