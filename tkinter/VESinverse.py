@@ -15,16 +15,14 @@ GUI implementation additions Created Winter 2021
 """
 
 # Imports
-# import tkinter
-# from tkinter import ttk
-
-# Constants
-# Schlumberger filter
 import numpy as np
 import random
 import matplotlib.pyplot as plt
 import sys
 from tkinter import *
+
+# Constants
+# Schlumberger filter
 FLTR1 = [0., .00046256, -.0010907, .0017122, -.0020687,
          .0043048, -.0021236, .015995, .017065, .098105, .21918, .64722,
          1.1415, .47819, -3.515, 2.7743, -1.201, .4544, -.19427, .097364,
@@ -79,20 +77,19 @@ u = [0] * 5000
 # this variable is never used
 # new_y = [0] * 1000
 
-ndat = 13
-
 # Input
-# INDEX = 2       # 1 is for shchlumberger and 2 is for Wenner
+# 1 is for shchlumberger and 2 is for Wenner
 algorithm_choice = 2
 SHCHLUMBERGER = 1
 WENNER = 2
-e = 3  # number of layers
-n = 2 * e - 1
+layers_choice = 2  # number of layers
+n = 2 * layers_choice - 1
 
 # hard coded data input - spacing and apparent resistivities measured
 # in the field
 adat = [0., 0.55, 0.95, 1.5, 2.5, 3., 4.5, 5.5, 9., 12., 20., 30., 70.]
 rdat = [0., 125., 110., 95., 40., 24., 15., 10.5, 8., 6., 6.5, 11., 25.]
+ndat = 13
 one30 = 1.e30
 rms = one30
 errmin = 1.e10
@@ -135,37 +132,56 @@ mainwindow = Tk()
 mainwindow.title('VES Inverse Data Input')
 mainwindow.configure(background="gainsboro")
 
-algorithm_index = IntVar(mainwindow, 1)
 frame = Frame(mainwindow)
 frame.pack()
 
+# variables used for GUI
+algorithm_index = IntVar(mainwindow, 1)
+num_layers = IntVar(mainwindow, 1)
+
 # function definitions
-
-
 def openGUI():
     global algorithm_choice
+    global layers_choice
+    global n
 
-    label = Label(mainwindow, text="Input Data for Resistvity Survey")
-    label.pack(side=TOP)
-
-    topframe = Frame(mainwindow)
-    topframe.pack(side=TOP)
+    # full window label
+    label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
+                  text="Input Data for Resistivity Survey")
+    label.pack(side=TOP, anchor=NW)
 
     # radiobuttons to pick algorithm to be used
-    shch_rb = Radiobutton(topframe, text="Shchlumberger",
+    topframe = Frame(mainwindow, background="gainsboro")
+    topframe.pack(side=TOP, anchor=NW)
+    shch_rb = Radiobutton(topframe, bg="gainsboro", text="Shchlumberger",
                           variable=algorithm_index, value=1)
     shch_rb.pack(side=LEFT)
-    wen_rb = Radiobutton(topframe, text="Wenner",
+    wen_rb = Radiobutton(topframe, bg="gainsboro", text="Wenner",
                          variable=algorithm_index, value=2)
     wen_rb.pack(side=RIGHT)
 
+    # drop down menu to pick number of layers
+    secondframe = Frame(mainwindow, background="gainsboro")
+    secondframe.pack(side=TOP, anchor=NW)
+    label = Label(secondframe, bg="gainsboro", font=("TkDefaultFont", 10),
+                  text="Number of Layers")
+    label.pack(side=LEFT)
+    layerlist = [
+        1, 2, 3, 4, 5
+    ]
+    #num_layers.set(layerlist[0])
+    layersmenu = OptionMenu(secondframe, num_layers, *layerlist)
+    layersmenu.config(bg="gainsboro")
+    layersmenu.pack(side=RIGHT)
+
     mainwindow.mainloop()
 
-    # set algorithm to be used to the one picked
-    if (algorithm_index.get() == 1):
-        algorithm_choice = 1
-    elif (algorithm_index.get() == 2):
-        algorithm_choice = 2
+    # set algorithm to Shchlumberger or Wenner
+    algorithm_choice = algorithm_index.get()
+
+    # set number of layers
+    layers_choice = num_layers.get()
+    n = 2 * layers_choice - 1
 
     return
 
@@ -220,8 +236,8 @@ def error():
 def transf(y, i):
     u = 1. / np.exp(y)
     t[1] = p[n]
-    for j in range(2, e+1, 1):
-        pwr = -2. * u * p[e+1-j]
+    for j in range(2, layers_choice+1, 1):
+        pwr = -2. * u * p[layers_choice+1-j]
         if pwr < np.log(2. * ep):
             pwr = np.log(2. * ep)
         a = np.exp(pwr)
@@ -229,7 +245,7 @@ def transf(y, i):
         rs = p[n + 1 - j]
         tpr = b * rs
         t[j] = (tpr + t[j-1]) / (1. + tpr * t[j-1] / (rs * rs))
-    r[i] = t[e]
+    r[i] = t[layers_choice]
     return
 
 
@@ -374,10 +390,10 @@ if __name__ == '__main__':
 
 # output the best fitting earth model
     print(' Layer ', '     Thickness  ', '   Res_ohm-m  ')
-    for i in range(1, e, 1):
-        print(i, pkeep[i], pkeep[e + i - 1])
+    for i in range(1, layers_choice, 1):
+        print(i, pkeep[i], pkeep[layers_choice + i - 1])
 
-    print(e, '  Infinite ', pkeep[n])
+    print(layers_choice, '  Infinite ', pkeep[n])
     for i in range(1, m + 1, 1):
         asavl[i] = np.log10(asav[i])
 
