@@ -140,6 +140,7 @@ algorithm_index = IntVar(mainwindow, 1)
 num_layers = IntVar(mainwindow, 1)
 num_iter = IntVar(mainwindow)
 num_datapoints = IntVar(mainwindow)
+resistivity_file = StringVar()
 
 # function definitions
 def openGUI():
@@ -148,6 +149,9 @@ def openGUI():
     global n
     global iter
     global ndat
+    global file_explore
+    global file_view
+    global resistivity_file
 
     # full window label
     main_label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
@@ -157,9 +161,11 @@ def openGUI():
     # file explore button
     preframe = Frame(mainwindow, background="gainsboro")
     preframe.pack(side=TOP, anchor=NW)
+    file_view = Label(preframe, bg="gainsboro", text = "No file")
+    file_view.pack(side=RIGHT)
     file_explore = Button(preframe, text = "Select Resistivity Data File",
                         command = pickFile)
-    file_explore.pack()
+    file_explore.pack(side=LEFT)
 
     # radiobuttons to pick algorithm to be used
     topframe = Frame(mainwindow, background="gainsboro")
@@ -220,15 +226,18 @@ def openGUI():
     return
 
 def pickFile():
-    resistivty_file = filedialog.askopenfilename(initialdir = "/",
-                                          title = "Select a File",
-                                          filetypes = (("Text files",
-                                                        "*.txt*"),
-                                                       ("all files",
-                                                        "*.*")))
+    global file_explore
+    global file_view
+    global resistivity_file
 
-    # Change label contents
-    # label_file_explorer.configure(text="Selected File Path " + resistivty_file)
+    # get file
+    resistivity_file = filedialog.askopenfilename(initialdir="/",
+                        title="Open File",
+                        filetypes=(("Text Files", "*.txt"),
+                        ("All Files", "*.*")))
+    # set label by file button to resistivity file link
+    file_view.config(text=resistivity_file)
+    return
 
 def readData():
     # normally this is where the data would be read from the csv file
