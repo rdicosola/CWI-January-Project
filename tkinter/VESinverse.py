@@ -9,7 +9,8 @@ for a layered earth model. Either schlumberger or Wenner configurations
 can be used
 """
 """
-GUI implementation additions Created Winter 2021
+GUI Implementation Additions
+Created Winter 2021
 
 @author: Rebecca DiCosola
 """
@@ -20,6 +21,7 @@ import random
 import matplotlib.pyplot as plt
 import sys
 from tkinter import *
+from tkinter import filedialog
 
 # Constants
 # Schlumberger filter
@@ -78,7 +80,6 @@ u = [0] * 5000
 # new_y = [0] * 1000
 
 # Input
-# 1 is for shchlumberger and 2 is for Wenner
 algorithm_choice = 2
 SHCHLUMBERGER = 1
 WENNER = 2
@@ -149,9 +150,16 @@ def openGUI():
     global ndat
 
     # full window label
-    label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
+    main_label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
                   text="Input Data for Resistivity Survey")
-    label.pack(side=TOP, anchor=NW)
+    main_label.pack(side=TOP, anchor=NW)
+
+    # file explore button
+    preframe = Frame(mainwindow, background="gainsboro")
+    preframe.pack(side=TOP, anchor=NW)
+    file_explore = Button(preframe, text = "Select Resistivity Data File",
+                        command = pickFile)
+    file_explore.pack()
 
     # radiobuttons to pick algorithm to be used
     topframe = Frame(mainwindow, background="gainsboro")
@@ -166,9 +174,9 @@ def openGUI():
     # drop down menu to pick number of layers
     secondframe = Frame(mainwindow, background="gainsboro")
     secondframe.pack(side=TOP, anchor=NW)
-    label = Label(secondframe, bg="gainsboro", font=("TkDefaultFont", 10),
+    dropdown_label = Label(secondframe, bg="gainsboro", font=("TkDefaultFont", 10),
                   text="Number of Layers (layers_choice)")
-    label.pack(side=LEFT)
+    dropdown_label.pack(side=LEFT)
     layerlist = [
         1, 2, 3, 4, 5
     ]
@@ -179,18 +187,18 @@ def openGUI():
     # box to enter number of iterations
     thirdframe = Frame(mainwindow, background="gainsboro")
     thirdframe.pack(side=TOP, anchor=NW)
-    label = Label(thirdframe, bg="gainsboro", font=("TkDefaultFont", 10),
+    iter_label = Label(thirdframe, bg="gainsboro", font=("TkDefaultFont", 10),
                   text="Number of Iterations (iter)")
-    label.pack(side=LEFT)
+    iter_label.pack(side=LEFT)
     iterentry = Entry(thirdframe, textvariable=num_iter)
     iterentry.pack(side=RIGHT)
 
     # box to enter number of data points
     fourthframe = Frame(mainwindow, background="gainsboro")
     fourthframe.pack(side=TOP, anchor=NW)
-    label = Label(fourthframe, bg="gainsboro", font=("TkDefaultFont", 10),
+    datapoint_label = Label(fourthframe, bg="gainsboro", font=("TkDefaultFont", 10),
                   text="Number of Data Points (ndat)")
-    label.pack(side=LEFT)
+    datapoint_label.pack(side=LEFT)
     ndatentry = Entry(fourthframe, textvariable=num_datapoints)
     ndatentry.pack(side=RIGHT)
 
@@ -210,6 +218,17 @@ def openGUI():
     ndat = num_datapoints.get()
 
     return
+
+def pickFile():
+    resistivty_file = filedialog.askopenfilename(initialdir = "/",
+                                          title = "Select a File",
+                                          filetypes = (("Text files",
+                                                        "*.txt*"),
+                                                       ("all files",
+                                                        "*.*")))
+
+    # Change label contents
+    # label_file_explorer.configure(text="Selected File Path " + resistivty_file)
 
 def readData():
     # normally this is where the data would be read from the csv file
