@@ -80,7 +80,7 @@ u = [0] * 5000
 # new_y = [0] * 1000
 
 # Input
-algorithm_choice = 2
+algorithm_choice = 1
 SHCHLUMBERGER = 1
 WENNER = 2
 layers_choice = 0  # number of layers
@@ -140,7 +140,7 @@ algorithm_index = IntVar(mainwindow, 1)
 num_layers = IntVar(mainwindow, 1)
 num_iter = IntVar(mainwindow)
 num_datapoints = IntVar(mainwindow)
-resistivity_file = StringVar()
+# resistivity_file = StringVar()
 
 # function definitions
 def openGUI():
@@ -152,6 +152,7 @@ def openGUI():
     global file_explore
     global file_view
     global resistivity_file
+    global file_content
 
     # full window label
     main_label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
@@ -167,15 +168,22 @@ def openGUI():
                         command = pickFile)
     file_explore.pack(side=LEFT)
 
+    # file read button
+    # filereadframe = Frame(mainwindow, background="gainsboro")
+    # filereadframe.pack(side=TOP, anchor=NW)
+    # file_read = Button(filereadframe, text = "Read in File Data",
+    #                     command = readFile)
+    # file_read.pack(side=LEFT)
+
     # radiobuttons to pick algorithm to be used
-    topframe = Frame(mainwindow, background="gainsboro")
-    topframe.pack(side=TOP, anchor=NW)
-    shch_rb = Radiobutton(topframe, bg="gainsboro", text="Shchlumberger",
-                          variable=algorithm_index, value=1)
-    shch_rb.pack(side=LEFT)
-    wen_rb = Radiobutton(topframe, bg="gainsboro", text="Wenner",
-                         variable=algorithm_index, value=2)
-    wen_rb.pack(side=RIGHT)
+    # topframe = Frame(mainwindow, background="gainsboro")
+    # topframe.pack(side=TOP, anchor=NW)
+    # shch_rb = Radiobutton(topframe, bg="gainsboro", text="Shchlumberger",
+    #                       variable=algorithm_index, value=1)
+    # shch_rb.pack(side=LEFT)
+    # wen_rb = Radiobutton(topframe, bg="gainsboro", text="Wenner",
+    #                      variable=algorithm_index, value=2)
+    # wen_rb.pack(side=RIGHT)
 
     # drop down menu to pick number of layers
     secondframe = Frame(mainwindow, background="gainsboro")
@@ -229,15 +237,42 @@ def pickFile():
     global file_explore
     global file_view
     global resistivity_file
+    global file_content
+    global algorithm_index
 
     # get file
     resistivity_file = filedialog.askopenfilename(initialdir="/",
                         title="Open File",
                         filetypes=(("Text Files", "*.txt"),
                         ("All Files", "*.*")))
+
     # set label by file button to resistivity file link
     file_view.config(text=resistivity_file)
+
+    # file_content = open(resistivity_file, 'r')
+    # file_list = file_content.split("/n")
+    # print(file_list)
+
+    # open the file
+    with open(resistivity_file, "r") as file_content:
+	    file_list = file_content.readlines()
+        # print(file_list)
+
+    # split the file
+    algorithm_index = file_list[1]
+    # for data in file_list:
+
     return
+
+# def readFile():
+#     global resistivity_file
+#     global file_content
+
+#     # read file
+#     # file_content = resistivity_file.read()
+
+#     file_content = open(resistivity_file, 'r')
+#     return
 
 def readData():
     # normally this is where the data would be read from the csv file
