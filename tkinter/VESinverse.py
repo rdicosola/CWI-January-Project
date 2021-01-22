@@ -85,7 +85,7 @@ SHCHLUMBERGER = 1
 WENNER = 2
 layers_choice = 0  # number of layers
 n = 2 * layers_choice - 1
-iter = 0  # number of iterations for the Monte Carlo guesses. to be input on GUI
+iter = 10000  # number of iterations for the Monte Carlo guesses. to be input on GUI
 
 # this is where the range in parameters should be input from a GUI
 # I'm hard coding this in for now
@@ -106,7 +106,7 @@ xlarge[5] = 3000.
 
 # hard coded data input - spacing and apparent resistivities measured
 # in the field
-ndat = 0
+ndat = 13
 adat = [0., 0.55, 0.95, 1.5, 2.5, 3., 4.5, 5.5, 9., 12., 20., 30., 70.]
 rdat = [0., 125., 110., 95., 40., 24., 15., 10.5, 8., 6., 6.5, 11., 25.]
 one30 = 1.e30
@@ -153,6 +153,7 @@ def openGUI():
     global file_view
     global resistivity_file
     global file_content
+    global algorithm_index
 
     # full window label
     main_label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
@@ -219,7 +220,7 @@ def openGUI():
     mainwindow.mainloop()
 
     # set algorithm to Shchlumberger or Wenner
-    algorithm_choice = algorithm_index.get()
+    # algorithm_choice = algorithm_index
 
     # set number of layers
     layers_choice = num_layers.get()
@@ -239,6 +240,8 @@ def pickFile():
     global resistivity_file
     global file_content
     global algorithm_index
+    global file_list
+    global algorithm_choice
 
     # get file
     resistivity_file = filedialog.askopenfilename(initialdir="/",
@@ -259,7 +262,13 @@ def pickFile():
         # print(file_list)
 
     # split the file
-    algorithm_index = file_list[1]
+    if file_list[1] == 1:
+        algorithm_choice = 1
+    elif file_list[1] == 2:
+        algorithm_choice = 2
+
+    print(file_list[1])
+    print(algorithm_choice)
     # for data in file_list:
 
     return
