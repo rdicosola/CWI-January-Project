@@ -107,8 +107,8 @@ xlarge[5] = 3000.
 # hard coded data input - spacing and apparent resistivities measured
 # in the field
 ndat = 13
-adat = [0., 0.55, 0.95, 1.5, 2.5, 3., 4.5, 5.5, 9., 12., 20., 30., 70.]
-rdat = [0., 125., 110., 95., 40., 24., 15., 10.5, 8., 6., 6.5, 11., 25.]
+# adat = [0., 0.55, 0.95, 1.5, 2.5, 3., 4.5, 5.5, 9., 12., 20., 30., 70.]
+# rdat = [0., 125., 110., 95., 40., 24., 15., 10.5, 8., 6., 6.5, 11., 25.]
 one30 = 1.e30
 rms = one30
 errmin = 1.e10
@@ -242,6 +242,8 @@ def pickFile():
     global algorithm_index
     global file_list
     global algorithm_choice
+    global adat
+    global rdat
 
     # get file
     resistivity_file = filedialog.askopenfilename(initialdir="/",
@@ -259,7 +261,6 @@ def pickFile():
     # open the file
     with open(resistivity_file, "r") as file_content:
 	    file_list = file_content.readlines()
-        # print(file_list)
 
     # split the file
     if file_list[1].strip() == "1":
@@ -267,11 +268,19 @@ def pickFile():
     elif file_list[1].strip() == "2":
         algorithm_choice = 2
 
-
-
-    print(file_list[1])
-    print(algorithm_choice)
     # for data in file_list:
+    # for i, value in enumerate(file_list, start=2):
+    #     # adat[n] = float[value]
+    #     fields = file_list[i].split()
+    #     val = float(fields[0])
+
+    for i in range(2, len(file_list)):
+        fields = file_list[i].split()
+        spacing_val = float(fields[0].strip())
+        resis_val = float(fields[1].strip())
+        adat[i] = spacing_val
+        rdat[i] = resis_val
+        print('-->' + file_list[i] + '<--')
 
     return
 
