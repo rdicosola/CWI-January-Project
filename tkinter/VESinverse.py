@@ -253,7 +253,7 @@ def pickFile():
     file_view.config(text=resistivity_file)
 
     # file_content = open(resistivity_file, 'r')
-    # file_list = file_content.split("/n")
+    # file_list = file_content.split("\n")
     # print(file_list)
 
     # open the file
@@ -262,10 +262,12 @@ def pickFile():
         # print(file_list)
 
     # split the file
-    if file_list[1] == 1:
+    if file_list[1].strip() == "1":
         algorithm_choice = 1
-    elif file_list[1] == 2:
+    elif file_list[1].strip() == "2":
         algorithm_choice = 2
+
+
 
     print(file_list[1])
     print(algorithm_choice)
