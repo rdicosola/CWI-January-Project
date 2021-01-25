@@ -154,6 +154,9 @@ def openGUI():
     global resistivity_file
     global file_content
     global algorithm_index
+    global rdat
+    global adat
+    global ndat
 
     # full window label
     main_label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
@@ -209,13 +212,13 @@ def openGUI():
     iterentry.pack(side=RIGHT)
 
     # box to enter number of data points
-    fourthframe = Frame(mainwindow, background="gainsboro")
-    fourthframe.pack(side=TOP, anchor=NW)
-    datapoint_label = Label(fourthframe, bg="gainsboro", font=("TkDefaultFont", 10),
-                  text="Number of Data Points (ndat)")
-    datapoint_label.pack(side=LEFT)
-    ndatentry = Entry(fourthframe, textvariable=num_datapoints)
-    ndatentry.pack(side=RIGHT)
+    # fourthframe = Frame(mainwindow, background="gainsboro")
+    # fourthframe.pack(side=TOP, anchor=NW)
+    # datapoint_label = Label(fourthframe, bg="gainsboro", font=("TkDefaultFont", 10),
+    #               text="Number of Data Points (ndat)")
+    # datapoint_label.pack(side=LEFT)
+    # ndatentry = Entry(fourthframe, textvariable=num_datapoints)
+    # ndatentry.pack(side=RIGHT)
 
     mainwindow.mainloop()
 
@@ -230,7 +233,7 @@ def openGUI():
     iter = num_iter.get()
 
     # set number of data points
-    ndat = num_datapoints.get()
+    # ndat = num_datapoints.get()
 
     return
 
@@ -244,6 +247,7 @@ def pickFile():
     global algorithm_choice
     global adat
     global rdat
+    global ndat
 
     # get file
     resistivity_file = filedialog.askopenfilename(initialdir="/",
@@ -262,6 +266,9 @@ def pickFile():
     with open(resistivity_file, "r") as file_content:
 	    file_list = file_content.readlines()
 
+    for i in range(2, len(file_list)):
+        print(file_list[i])
+
     # split the file
     if file_list[1].strip() == "1":
         algorithm_choice = 1
@@ -276,12 +283,22 @@ def pickFile():
 
     for i in range(2, len(file_list)):
         fields = file_list[i].split()
-        spacing_val = float(fields[0].strip())
-        resis_val = float(fields[1].strip())
-        adat[i] = spacing_val
-        rdat[i] = resis_val
-        print('-->' + file_list[i] + '<--')
+        spacing_val = fields[0].strip()
+        # print('-->' + spacing_val + '<--')
+        resis_val = fields[1].strip()
+        # print('-->' + resis_val + '<--')
+        spacing_float = float(spacing_val)
+        resis_float = float(resis_val)
+        adat[i] = spacing_float
+        rdat[i] = resis_float
 
+    ndat = len(file_list) - 2
+
+
+    #     # readData()
+    #     for i in range(1, ndat, 1):
+    #         adatl[i] = np.log10(adat[i])
+    #         rdatl[i] = np.log10(rdat[i])
     return
 
 # def readFile():
@@ -294,14 +311,15 @@ def pickFile():
 #     file_content = open(resistivity_file, 'r')
 #     return
 
-def readData():
-    # normally this is where the data would be read from the csv file
-    # but now I'm just hard coding it in as global lists
-    for i in range(1, ndat, 1):
-        adatl[i] = np.log10(adat[i])
-        rdatl[i] = np.log10(rdat[i])
-
-    return
+# def readData():
+#     # normally this is where the data would be read from the csv file
+#     # but now I'm just hard coding it in as global lists
+#     for i in range(1, ndat, 1):
+#         adatl[i] = np.log10(adat[i])
+#         print(adatl[i])
+#         rdatl[i] = np.log10(rdat[i])
+#         print(rdatl[i])
+#     return
 
 
 def error():
@@ -460,7 +478,7 @@ if __name__ == '__main__':
     # Seed the RNG so we don't have randomness while testing
     random.seed(0)
     openGUI()
-    readData()
+    # readData()
     print(adat[1:ndat], rdat[1:ndat])
     for iloop in range(1, iter + 1, 1):
         #print( '  iloop is ', iloop)
