@@ -159,81 +159,62 @@ def openGUI():
     global ndat
 
     # full window label
-    main_label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
-                  text="Input Data for Resistivity Survey")
-    main_label.pack(side=TOP, anchor=NW)
+    # main_label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
+    #               text="Input Data for Resistivity Survey")
+    # main_label.pack(side=TOP, anchor=NW)
 
     # file explore button
     preframe = Frame(mainwindow, background="gainsboro")
     preframe.pack(side=TOP, anchor=NW)
-    file_view = Label(preframe, bg="gainsboro", text = "No file")
-    file_view.pack(side=RIGHT)
+    selected_file = Label(preframe, bg="gainsboro", text = "Selected File Path")
+    selected_file.grid(row=1, column=2)
+    file_view = Label(preframe, bg="gainsboro", text = "No file", width=40, wraplength=220, justify="center")
+    file_view.grid(row=2, column=2)
     file_explore = Button(preframe, text = "Select Resistivity Data File",
                         command = pickFile)
-    file_explore.pack(side=LEFT)
-
-    # file read button
-    # filereadframe = Frame(mainwindow, background="gainsboro")
-    # filereadframe.pack(side=TOP, anchor=NW)
-    # file_read = Button(filereadframe, text = "Read in File Data",
-    #                     command = readFile)
-    # file_read.pack(side=LEFT)
-
-    # radiobuttons to pick algorithm to be used
-    # topframe = Frame(mainwindow, background="gainsboro")
-    # topframe.pack(side=TOP, anchor=NW)
-    # shch_rb = Radiobutton(topframe, bg="gainsboro", text="Shchlumberger",
-    #                       variable=algorithm_index, value=1)
-    # shch_rb.pack(side=LEFT)
-    # wen_rb = Radiobutton(topframe, bg="gainsboro", text="Wenner",
-    #                      variable=algorithm_index, value=2)
-    # wen_rb.pack(side=RIGHT)
+    file_explore.grid(row=1, column=1, rowspan=2)
 
     # drop down menu to pick number of layers
-    secondframe = Frame(mainwindow, background="gainsboro")
-    secondframe.pack(side=TOP, anchor=NW)
-    dropdown_label = Label(secondframe, bg="gainsboro", font=("TkDefaultFont", 10),
-                  text="Number of Layers (layers_choice)")
-    dropdown_label.pack(side=LEFT)
+    dropdown_label = Label(preframe, bg="gainsboro", font=("TkDefaultFont", 10),
+                  text="Number of Layers", width=20)
+    dropdown_label.grid(row=1, column=3)
     layerlist = [
         1, 2, 3, 4, 5
     ]
-    layersmenu = OptionMenu(secondframe, num_layers, *layerlist)
+    layersmenu = OptionMenu(preframe, num_layers, *layerlist)
     layersmenu.config(bg="gainsboro")
-    layersmenu.pack(side=RIGHT)
+    layersmenu.grid(row=2, column=3)
 
     # box to enter number of iterations
-    thirdframe = Frame(mainwindow, background="gainsboro")
-    thirdframe.pack(side=TOP, anchor=NW)
-    iter_label = Label(thirdframe, bg="gainsboro", font=("TkDefaultFont", 10),
-                  text="Number of Iterations (iter)")
-    iter_label.pack(side=LEFT)
-    iterentry = Entry(thirdframe, textvariable=num_iter)
-    iterentry.pack(side=RIGHT)
+    iter_label = Label(preframe, bg="gainsboro", font=("TkDefaultFont", 10),
+                  text="Number of Iterations", width=20)
+    iter_label.grid(row=1, column=4)
+    iterentry = Entry(preframe, textvariable=num_iter, width=10)
+    iterentry.grid(row=2, column=4)
 
-    # box to enter number of data points
-    # fourthframe = Frame(mainwindow, background="gainsboro")
-    # fourthframe.pack(side=TOP, anchor=NW)
-    # datapoint_label = Label(fourthframe, bg="gainsboro", font=("TkDefaultFont", 10),
-    #               text="Number of Data Points (ndat)")
-    # datapoint_label.pack(side=LEFT)
-    # ndatentry = Entry(fourthframe, textvariable=num_datapoints)
-    # ndatentry.pack(side=RIGHT)
+    # button to add details below for num layers
+    layersframe = Frame(mainwindow, background="gainsboro")
+    layersframe.pack(side=TOP, anchor=NW)
+    layer_details = Button(layersframe, text = "Add layer details",
+                        command = layerDetails)
+    layer_details.grid(row=1, columnspan=7)
 
-    mainwindow.mainloop()
+    # execute VEScurves button
+    executionframe = Frame(mainwindow, background="gainsboro")
+    executionframe.pack(side=BOTTOM, anchor=SW)
+    execute_VES = Button(executionframe, text = "Execute VEScurves",
+                        command = executeVES)
+    execute_VES.grid(row=1, column=1)
 
-    # set algorithm to Shchlumberger or Wenner
-    # algorithm_choice = algorithm_index
+    # view predicted model button
+    view_model = Button(executionframe, text = "View Predicted Model",
+                        command = executeVES)
+    view_model.grid(row=1, column=2)
 
-    # set number of layers
-    layers_choice = num_layers.get()
-    n = 2 * layers_choice - 1
-
-    # set number of iterations
-    iter = num_iter.get()
-
-    # set number of data points
-    # ndat = num_datapoints.get()
+    # plot curves button
+    plot_curves = Button(executionframe, text = "Plot the Curves",
+                        command = executeVES)
+    plot_curves.grid(row=1, column=3)
 
     return
 
@@ -319,6 +300,25 @@ def pickFile():
 #         rdatl[i] = np.log10(rdat[i])
 #         print(rdatl[i])
 #     return
+
+def layerDetails():
+    layerinputframe = Frame(mainwindow, background="gainsboro")
+    layerinputframe.pack(side=BOTTOM, anchor=SW)
+    # thickness range
+    thickness_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 10),
+                  text="Model Range in Thickness (m)")
+    thickness_label.grid(row=1, column=1)
+
+    # resistivity range
+    resistivity = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 10),
+                  text="Model Range in Resistivity (m)")
+    resistivity.grid(row=1, column=3)
+
+    return
+
+def executeVES():
+    return
+
 
 
 def error():
@@ -477,6 +477,20 @@ if __name__ == '__main__':
     # Seed the RNG so we don't have randomness while testing
     random.seed(0)
     openGUI()
+    mainwindow.mainloop()
+
+    # set algorithm to Shchlumberger or Wenner
+    # algorithm_choice = algorithm_index
+
+    # set number of layers
+    layers_choice = num_layers.get()
+    n = 2 * layers_choice - 1
+
+    # set number of iterations
+    iter = num_iter.get()
+
+    # set number of data points
+    # ndat = num_datapoints.get()
     # readData()
     print(adat[1:ndat], rdat[1:ndat])
     for iloop in range(1, iter + 1, 1):
