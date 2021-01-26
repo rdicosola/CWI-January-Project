@@ -129,7 +129,7 @@ while fctr > 1.:
 
 # GUI initialization
 mainwindow = Tk()
-mainwindow.title('VES Inverse Data Input')
+mainwindow.title('VES Inverse Monte Carlo')
 mainwindow.configure(background="gainsboro")
 
 frame = Frame(mainwindow)
@@ -140,6 +140,7 @@ algorithm_index = IntVar(mainwindow, 1)
 num_layers = IntVar(mainwindow, 1)
 num_iter = IntVar(mainwindow)
 num_datapoints = IntVar(mainwindow)
+layer_data = IntVar(mainwindow)
 # resistivity_file = StringVar()
 
 # function definitions
@@ -175,7 +176,7 @@ def openGUI():
     file_explore.grid(row=1, column=1, rowspan=2)
 
     # drop down menu to pick number of layers
-    dropdown_label = Label(preframe, bg="gainsboro", font=("TkDefaultFont", 10),
+    dropdown_label = Label(preframe, bg="gainsboro",
                   text="Number of Layers", width=20)
     dropdown_label.grid(row=1, column=3)
     layerlist = [
@@ -186,35 +187,35 @@ def openGUI():
     layersmenu.grid(row=2, column=3)
 
     # box to enter number of iterations
-    iter_label = Label(preframe, bg="gainsboro", font=("TkDefaultFont", 10),
+    iter_label = Label(preframe, bg="gainsboro",
                   text="Number of Iterations", width=20)
     iter_label.grid(row=1, column=4)
     iterentry = Entry(preframe, textvariable=num_iter, width=10)
-    iterentry.grid(row=2, column=4)
+    iterentry.grid(row=2, column=4, pady=5)
 
     # button to add details below for num layers
     layersframe = Frame(mainwindow, background="gainsboro")
     layersframe.pack(side=TOP, anchor=NW)
     layer_details = Button(layersframe, text = "Add layer details",
                         command = layerDetails)
-    layer_details.grid(row=1, columnspan=7)
+    layer_details.grid(row=1, columnspan=7, pady=5)
 
     # execute VEScurves button
     executionframe = Frame(mainwindow, background="gainsboro")
     executionframe.pack(side=BOTTOM, anchor=SW)
     execute_VES = Button(executionframe, text = "Execute VEScurves",
                         command = executeVES)
-    execute_VES.grid(row=1, column=1)
+    execute_VES.grid(row=1, column=1, pady=5)
 
     # view predicted model button
     view_model = Button(executionframe, text = "View Predicted Model",
                         command = executeVES)
-    view_model.grid(row=1, column=2)
+    view_model.grid(row=1, column=2, pady=5)
 
     # plot curves button
     plot_curves = Button(executionframe, text = "Plot the Curves",
                         command = executeVES)
-    plot_curves.grid(row=1, column=3)
+    plot_curves.grid(row=1, column=3, pady=5)
 
     return
 
@@ -255,12 +256,6 @@ def pickFile():
         algorithm_choice = 1
     elif file_list[1].strip() == "2":
         algorithm_choice = 2
-
-    # for data in file_list:
-    # for i, value in enumerate(file_list, start=2):
-    #     # adat[n] = float[value]
-    #     fields = file_list[i].split()
-    #     val = float(fields[0])
 
     for i in range(2, len(file_list)):
         fields = file_list[i].split()
@@ -305,14 +300,46 @@ def layerDetails():
     layerinputframe = Frame(mainwindow, background="gainsboro")
     layerinputframe.pack(side=BOTTOM, anchor=SW)
     # thickness range
-    thickness_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 10),
+    thickness_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
                   text="Model Range in Thickness (m)")
-    thickness_label.grid(row=1, column=1)
+    thickness_label.grid(row=1, column=1, columnspan=3, pady=5)
 
     # resistivity range
-    resistivity = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 10),
+    resistivity = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
                   text="Model Range in Resistivity (m)")
-    resistivity.grid(row=1, column=3)
+    resistivity.grid(row=1, column=5, columnspan=3, pady=5)
+
+    # thickness minimum values
+    thick_min_label = Label(layerinputframe, bg="gainsboro",
+                  text="Minimum\nValue", width=15)
+    thick_min_label.grid(row=2, column=1)
+    for i in range(layers_choice):
+        Entry(preframe, textvariable=layer_data, width=10)
+
+    # thickness maximum values
+    thick_max_label = Label(layerinputframe, bg="gainsboro",
+                  text="Maximum\nValue", width=15)
+    thick_max_label.grid(row=2, column=2)
+
+    # thickness predictions
+    thick_pred_label = Label(layerinputframe, bg="gainsboro",
+                  text="Thickness\nPrediction", width=15)
+    thick_pred_label.grid(row=2, column=3)
+
+    # resistivity predictions
+    res_pred_label = Label(layerinputframe, bg="gainsboro",
+                  text="Resistivity\nPrediction", width=15)
+    res_pred_label.grid(row=2, column=5)
+
+    # resistivity minimum values
+    res_min_label = Label(layerinputframe, bg="gainsboro",
+                  text="Minimum\nValue", width=15)
+    res_min_label.grid(row=2, column=6)
+
+    # resistivity maximum values
+    res_max_label = Label(layerinputframe, bg="gainsboro",
+                  text="Maximum\nValue", width=15)
+    res_max_label.grid(row=2, column=7)
 
     return
 
