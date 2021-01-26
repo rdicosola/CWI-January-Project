@@ -295,10 +295,10 @@ def pickFile():
     ndat = len(file_list) - 2
 
 
-    #     # readData()
-    #     for i in range(1, ndat, 1):
-    #         adatl[i] = np.log10(adat[i])
-    #         rdatl[i] = np.log10(rdat[i])
+        # readData()
+        for i in range(1, ndat, 1):
+            adatl[i] = np.log10(adat[i])
+            rdatl[i] = np.log10(rdat[i])
     return
 
 # def readFile():
