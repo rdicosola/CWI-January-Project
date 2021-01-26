@@ -289,16 +289,15 @@ def pickFile():
         # print('-->' + resis_val + '<--')
         spacing_float = float(spacing_val)
         resis_float = float(resis_val)
-        adat[i] = spacing_float
-        rdat[i] = resis_float
+        adat[i-2] = spacing_float
+        rdat[i-2] = resis_float
 
     ndat = len(file_list) - 2
 
-
-        # readData()
-        for i in range(1, ndat, 1):
-            adatl[i] = np.log10(adat[i])
-            rdatl[i] = np.log10(rdat[i])
+    # old readData()
+    for i in range(1, ndat, 1):
+        adatl[i] = np.log10(adat[i])
+        rdatl[i] = np.log10(rdat[i])
     return
 
 # def readFile():
