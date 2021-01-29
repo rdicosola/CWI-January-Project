@@ -304,7 +304,6 @@ def layerDetails():
 
     # set number of layers
     layers_choice = num_layers.get()
-    n = 2 * layers_choice - 1
 
     # full frame
     layerinputframe = Frame(mainwindow, background="gainsboro")
@@ -325,18 +324,20 @@ def layerDetails():
                   text="Minimum\nValue", width=15)
     thick_min_label.grid(row=2, column=1)
     thick_min_list = [0] * layers_choice
-    for i in range(layers_choice):
+    for i in range(layers_choice - 1):
         thick_min_data = Entry(layerinputframe, textvariable=thick_min_layer, width=10)
         thick_min_list[i] = (thick_min_layer)
         thick_min_data.grid(row=i+3, column=1)
-
+    infinite_label = Label(layerinputframe, bg="gainsboro",
+                  text="Infinite Thickness")
+    infinite_label.grid(row=layers_choice+2, column=1, columnspan=2)
 
     # thickness maximum values
     thick_max_label = Label(layerinputframe, bg="gainsboro",
                   text="Maximum\nValue", width=15)
     thick_max_label.grid(row=2, column=2)
     thick_max_list = [0] * layers_choice
-    for i in range(layers_choice):
+    for i in range(layers_choice - 1):
         thick_max_data = Entry(layerinputframe, textvariable=thick_max_layer, width=10)
         thick_max_list[i] = (thick_max_layer)
         thick_max_data.grid(row=i+3, column=2)
@@ -541,6 +542,10 @@ if __name__ == '__main__':
 
     # set number of iterations
     iter = num_iter.get()
+
+    # get number of layers
+    layers_choice = num_layers.get()
+    n = 2 * layers_choice - 1
 
     # set number of data points
     # ndat = num_datapoints.get()
