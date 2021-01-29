@@ -140,7 +140,10 @@ algorithm_index = IntVar(mainwindow, 1)
 num_layers = IntVar(mainwindow, 1)
 num_iter = IntVar(mainwindow)
 num_datapoints = IntVar(mainwindow)
-layer_data = IntVar(mainwindow)
+thick_min_layer = IntVar(mainwindow)
+thick_max_layer = IntVar(mainwindow)
+res_min_layer = IntVar(mainwindow)
+res_max_layer = IntVar(mainwindow)
 # resistivity_file = StringVar()
 
 # function definitions
@@ -297,8 +300,16 @@ def pickFile():
 #     return
 
 def layerDetails():
+    global layers_choice
+
+    # set number of layers
+    layers_choice = num_layers.get()
+    n = 2 * layers_choice - 1
+
+    # full frame
     layerinputframe = Frame(mainwindow, background="gainsboro")
     layerinputframe.pack(side=BOTTOM, anchor=SW)
+
     # thickness range
     thickness_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
                   text="Model Range in Thickness (m)")
@@ -313,17 +324,22 @@ def layerDetails():
     thick_min_label = Label(layerinputframe, bg="gainsboro",
                   text="Minimum\nValue", width=15)
     thick_min_label.grid(row=2, column=1)
-    thick_min_list = []
-    # for i in range(layers_choice):
-    #     thick_min_data = Entry(preframe, textvariable=layer_data,width=10)
-    #     thick_min_list[i].append(layer_data)
-    #     thick_min_data.grid(row=i+2, column=1)
+    thick_min_list = [0] * layers_choice
+    for i in range(layers_choice):
+        thick_min_data = Entry(layerinputframe, textvariable=thick_min_layer, width=10)
+        thick_min_list[i] = (thick_min_layer)
+        thick_min_data.grid(row=i+3, column=1)
 
 
     # thickness maximum values
     thick_max_label = Label(layerinputframe, bg="gainsboro",
                   text="Maximum\nValue", width=15)
     thick_max_label.grid(row=2, column=2)
+    thick_max_list = [0] * layers_choice
+    for i in range(layers_choice):
+        thick_max_data = Entry(layerinputframe, textvariable=thick_max_layer, width=10)
+        thick_max_list[i] = (thick_max_layer)
+        thick_max_data.grid(row=i+3, column=2)
 
     # thickness predictions
     thick_pred_label = Label(layerinputframe, bg="gainsboro",
@@ -339,11 +355,21 @@ def layerDetails():
     res_min_label = Label(layerinputframe, bg="gainsboro",
                   text="Minimum\nValue", width=15)
     res_min_label.grid(row=2, column=6)
+    res_min_list = [0] * layers_choice
+    for i in range(layers_choice):
+        res_min_data = Entry(layerinputframe, textvariable=res_min_layer, width=10)
+        res_min_list[i] = (res_min_layer)
+        res_min_data.grid(row=i+3, column=6)
 
     # resistivity maximum values
     res_max_label = Label(layerinputframe, bg="gainsboro",
                   text="Maximum\nValue", width=15)
     res_max_label.grid(row=2, column=7)
+    res_max_list = [0] * layers_choice
+    for i in range(layers_choice):
+        res_max_data = Entry(layerinputframe, textvariable=res_max_layer, width=10)
+        res_max_list[i] = (res_max_layer)
+        res_max_data.grid(row=i+3, column=7)
 
     return
 
@@ -512,10 +538,6 @@ if __name__ == '__main__':
 
     # set algorithm to Shchlumberger or Wenner
     # algorithm_choice = algorithm_index
-
-    # set number of layers
-    layers_choice = num_layers.get()
-    n = 2 * layers_choice - 1
 
     # set number of iterations
     iter = num_iter.get()
