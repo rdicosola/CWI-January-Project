@@ -313,8 +313,12 @@ def layerDetails():
     thick_min_label = Label(layerinputframe, bg="gainsboro",
                   text="Minimum\nValue", width=15)
     thick_min_label.grid(row=2, column=1)
-    for i in range(layers_choice):
-        Entry(preframe, textvariable=layer_data, width=10)
+    thick_min_list = []
+    # for i in range(layers_choice):
+    #     thick_min_data = Entry(preframe, textvariable=layer_data,width=10)
+    #     thick_min_list[i].append(layer_data)
+    #     thick_min_data.grid(row=i+2, column=1)
+
 
     # thickness maximum values
     thick_max_label = Label(layerinputframe, bg="gainsboro",
