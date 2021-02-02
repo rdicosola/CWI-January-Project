@@ -93,16 +93,17 @@ iter = 10000  # number of iterations for the Monte Carlo guesses. to be input on
 # enter thickenss range for each layer and then resistivity range.
 # for 3 layers small[1] and small[2] are low end of thickness range
 # small[3], small[4] and small[5] are the low end of resistivities
-small[1] = 1.
-xlarge[1] = 5
-small[2] = 10.
-xlarge[2] = 75.
-small[3] = 20.
-xlarge[3] = 200.
-small[4] = 2.
-xlarge[4] = 100
-small[5] = 500.
-xlarge[5] = 3000.
+
+# small[1] = 1.
+# xlarge[1] = 5
+# small[2] = 10.
+# xlarge[2] = 75.
+# small[3] = 20.
+# xlarge[3] = 200.
+# small[4] = 2.
+# xlarge[4] = 100
+# small[5] = 500.
+# xlarge[5] = 3000.
 
 # hard coded data input - spacing and apparent resistivities measured
 # in the field
@@ -137,13 +138,9 @@ frame.pack()
 
 # variables used for GUI
 algorithm_index = IntVar(mainwindow, 1)
-num_layers = IntVar(mainwindow, 1)
-num_iter = IntVar(mainwindow)
-num_datapoints = IntVar(mainwindow)
-thick_min_layer = IntVar(mainwindow)
-thick_max_layer = IntVar(mainwindow)
-res_min_layer = IntVar(mainwindow)
-res_max_layer = IntVar(mainwindow)
+num_layers = IntVar(mainwindow, 3)
+num_iter = IntVar(mainwindow, 10000)
+# num_datapoints = IntVar(mainwindow)
 # resistivity_file = StringVar()
 
 # function definitions
@@ -300,14 +297,33 @@ def pickFile():
 #     return
 
 def layerDetails():
+    # thick_max_layer = IntVar(mainwindow)
+    # res_min_layer = IntVar(mainwindow)
+    # res_max_layer = IntVar(mainwindow)
+
     global layers_choice
+    global thick_min_layer
+    global thick_max_layer
+    global res_min_layer
+    global res_max_layer
 
     # set number of layers
     layers_choice = num_layers.get()
 
+    # initialize arrays
+    thick_min_layer = [0]*(layers_choice - 1)
+    thick_max_layer = [0]*(layers_choice - 1)
+    res_min_layer = [0]*(layers_choice)
+    res_max_layer = [0]*(layers_choice)
+
     # full frame
     layerinputframe = Frame(mainwindow, background="gainsboro")
     layerinputframe.pack(side=BOTTOM, anchor=SW)
+
+    # note while working on functionality
+    note_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 7),
+                  text="  --> For predictable results, enter data commented out that was originally hard coded in.")
+    note_label.grid(row=8, column=1, columnspan=3, pady=5)
 
     # thickness range
     thickness_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
@@ -323,10 +339,9 @@ def layerDetails():
     thick_min_label = Label(layerinputframe, bg="gainsboro",
                   text="Minimum\nValue", width=15)
     thick_min_label.grid(row=2, column=1)
-    thick_min_list = [0] * layers_choice
-    for i in range(layers_choice - 1):
-        thick_min_data = Entry(layerinputframe, textvariable=thick_min_layer, width=10)
-        thick_min_list[i] = (thick_min_layer)
+    for i in range(0, layers_choice - 1, 1):
+        thick_min_layer[i] = IntVar(mainwindow)
+        thick_min_data = Entry(layerinputframe, textvariable=thick_min_layer[i], width=10)
         thick_min_data.grid(row=i+3, column=1)
     infinite_label = Label(layerinputframe, bg="gainsboro",
                   text="Infinite Thickness")
@@ -336,10 +351,9 @@ def layerDetails():
     thick_max_label = Label(layerinputframe, bg="gainsboro",
                   text="Maximum\nValue", width=15)
     thick_max_label.grid(row=2, column=2)
-    thick_max_list = [0] * layers_choice
-    for i in range(layers_choice - 1):
-        thick_max_data = Entry(layerinputframe, textvariable=thick_max_layer, width=10)
-        thick_max_list[i] = (thick_max_layer)
+    for i in range(0, layers_choice - 1, 1):
+        thick_max_layer[i] = IntVar(mainwindow)
+        thick_max_data = Entry(layerinputframe, textvariable=thick_max_layer[i], width=10)
         thick_max_data.grid(row=i+3, column=2)
 
     # thickness predictions
@@ -356,10 +370,9 @@ def layerDetails():
     res_min_label = Label(layerinputframe, bg="gainsboro",
                   text="Minimum\nValue", width=15)
     res_min_label.grid(row=2, column=6)
-    res_min_list = [0] * layers_choice
-    for i in range(layers_choice):
-        res_min_data = Entry(layerinputframe, textvariable=res_min_layer, width=10)
-        res_min_list[i] = (res_min_layer)
+    for i in range(0, layers_choice, 1):
+        res_min_layer[i] = IntVar(mainwindow)
+        res_min_data = Entry(layerinputframe, textvariable=res_min_layer[i], width=10)
         res_min_data.grid(row=i+3, column=6)
 
     # resistivity maximum values
@@ -367,9 +380,9 @@ def layerDetails():
                   text="Maximum\nValue", width=15)
     res_max_label.grid(row=2, column=7)
     res_max_list = [0] * layers_choice
-    for i in range(layers_choice):
-        res_max_data = Entry(layerinputframe, textvariable=res_max_layer, width=10)
-        res_max_list[i] = (res_max_layer)
+    for i in range(0, layers_choice, 1):
+        res_max_layer[i] = IntVar(mainwindow)
+        res_max_data = Entry(layerinputframe, textvariable=res_max_layer[i], width=10)
         res_max_data.grid(row=i+3, column=7)
 
     return
@@ -547,13 +560,29 @@ if __name__ == '__main__':
     layers_choice = num_layers.get()
     n = 2 * layers_choice - 1
 
+    # set small[] and xlarge[]
+    for i in range (layers_choice - 1):
+        small[i + 1] = thick_min_layer[i].get()
+    for i in range (layers_choice - 1):
+        xlarge[i + 1] = thick_max_layer[i].get()
+    for i in range (layers_choice):
+        small[i + layers_choice] = res_min_layer[i].get()
+    for i in range (layers_choice):
+        xlarge[i + layers_choice] = res_max_layer[i].get()
+
     # set number of data points
     # ndat = num_datapoints.get()
+
     # readData()
+
     print(adat[1:ndat], rdat[1:ndat])
     for iloop in range(1, iter + 1, 1):
         #print( '  iloop is ', iloop)
-        for i in range(1, n + 1, 1):
+        for i in range(1, layers_choice + 1, 1):
+            randNumber = random.random()
+            #print(randNumber, '  random')
+            p[i] = (xlarge[i] - small[i]) * randNumber + small[i]
+        for i in range(layers_choice + 1, n + 1, 1):
             randNumber = random.random()
             #print(randNumber, '  random')
             p[i] = (xlarge[i] - small[i]) * randNumber + small[i]
