@@ -387,11 +387,6 @@ def layerDetails():
 
     return
 
-def executeVES():
-    return
-
-
-
 def error():
     sumerror = 0.
     #pltanswer = [0] * 64
@@ -541,6 +536,9 @@ def splint(n, x, xa=[], ya=[], y2a=[]):
     #print("x=   ", x,"y=  ", y, "  ya=  ", ya[khi],"  y2a=  ", y2a[khi], "  h=  ",h)
 
     return y
+
+def executeVES():
+    return
 
 
 # Main
