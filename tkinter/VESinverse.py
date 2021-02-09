@@ -101,9 +101,10 @@ iter = 10000  # number of iterations for the Monte Carlo guesses. to be input on
 # small[3] = 20.
 # xlarge[3] = 200.
 # small[4] = 2.
-# xlarge[4] = 100
+# xlarge[4] = 100.
 # small[5] = 500.
 # xlarge[5] = 3000.
+# 1 10 5 75 20 2 500 200 100 3000
 
 # hard coded data input - spacing and apparent resistivities measured
 # in the field
@@ -159,11 +160,6 @@ def openGUI():
     global adat
     global ndat
 
-    # full window label
-    # main_label = Label(mainwindow, bg="gainsboro", font=("TkDefaultFont", 15),
-    #               text="Input Data for Resistivity Survey")
-    # main_label.pack(side=TOP, anchor=NW)
-
     # file explore button
     preframe = Frame(mainwindow, background="gainsboro")
     preframe.pack(side=TOP, anchor=NW)
@@ -214,7 +210,7 @@ def openGUI():
 
     # plot curves button
     plot_curves = Button(executionframe, text = "Plot the Curves",
-                        command = executeVES)
+                        command = plotCurves)
     plot_curves.grid(row=1, column=3, pady=5)
 
     return
@@ -239,10 +235,6 @@ def pickFile():
 
     # set label by file button to resistivity file link
     file_view.config(text=resistivity_file)
-
-    # file_content = open(resistivity_file, 'r')
-    # file_list = file_content.split("\n")
-    # print(file_list)
 
     # open the file
     with open(resistivity_file, "r") as file_content:
@@ -276,16 +268,7 @@ def pickFile():
         rdatl[i] = np.log10(rdat[i])
     return
 
-# def readFile():
-#     global resistivity_file
-#     global file_content
-
-#     # read file
-#     # file_content = resistivity_file.read()
-
-#     file_content = open(resistivity_file, 'r')
-#     return
-
+# not used anymore. from the original code.
 # def readData():
 #     # normally this is where the data would be read from the csv file
 #     # but now I'm just hard coding it in as global lists
@@ -297,10 +280,6 @@ def pickFile():
 #     return
 
 def layerDetails():
-    # thick_max_layer = IntVar(mainwindow)
-    # res_min_layer = IntVar(mainwindow)
-    # res_max_layer = IntVar(mainwindow)
-
     global layers_choice
     global thick_min_layer
     global thick_max_layer
@@ -538,18 +517,31 @@ def splint(n, x, xa=[], ya=[], y2a=[]):
     return y
 
 def executeVES():
-    return
-
-
-# Main
-if __name__ == '__main__':
-    # Seed the RNG so we don't have randomness while testing
-    random.seed(0)
-    openGUI()
-    mainwindow.mainloop()
-
-    # set algorithm to Shchlumberger or Wenner
-    # algorithm_choice = algorithm_index
+    global iter
+    global num_iter
+    global layers_choice
+    global num_layers
+    global n
+    global small
+    global xlarge
+    global thick_min_layer
+    global thick_max_layer
+    global res_min_layer
+    global res_max_layer
+    global adat
+    global rdat
+    global ndat
+    global rms
+    global errmin
+    global pkeep
+    global m
+    global asav
+    global asavl
+    global rkeep
+    global rkeepl
+    global pltanswerkeep
+    global plt
+    global sys
 
     # set number of iterations
     iter = num_iter.get()
@@ -622,6 +614,23 @@ if __name__ == '__main__':
     s = 7
     plt.loglog(adat[1:ndat], rdat[1:ndat], 'bo',
                markersize=s)  # original data blue dots
+    # plt.show()
+    # plt.grid(True)
+    # sys.exit(0)
+    return
+
+def plotCurves():
+    global plt
+    global sys
     plt.show()
     plt.grid(True)
     sys.exit(0)
+    return
+
+
+# Main
+if __name__ == '__main__':
+    # Seed the RNG so we don't have randomness while testing
+    random.seed(0)
+    openGUI()
+    mainwindow.mainloop()
