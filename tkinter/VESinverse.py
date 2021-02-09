@@ -205,7 +205,7 @@ def openGUI():
 
     # view predicted model button
     view_model = Button(executionframe, text = "View Predicted Model",
-                        command = executeVES)
+                        command = viewModel)
     view_model.grid(row=1, column=2, pady=5)
 
     # plot curves button
@@ -285,6 +285,7 @@ def layerDetails():
     global thick_max_layer
     global res_min_layer
     global res_max_layer
+    global layerinputframe
 
     # set number of layers
     layers_choice = num_layers.get()
@@ -301,7 +302,7 @@ def layerDetails():
 
     # note while working on functionality
     note_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 7),
-                  text="  --> For predictable results, enter data commented out that was originally hard coded in.")
+                  text="  --> For predictable results, enter 1 10 5 75 20 2 500 200 100 3000")
     note_label.grid(row=8, column=1, columnspan=3, pady=5)
 
     # thickness range
@@ -516,7 +517,9 @@ def splint(n, x, xa=[], ya=[], y2a=[]):
 
     return y
 
+# when executeVES button pressed after information is inputed, executeVES will execute
 def executeVES():
+    # will cut down global variables in future
     global iter
     global num_iter
     global layers_choice
@@ -559,11 +562,6 @@ def executeVES():
         small[i + layers_choice] = res_min_layer[i].get()
     for i in range (layers_choice):
         xlarge[i + layers_choice] = res_max_layer[i].get()
-
-    # set number of data points
-    # ndat = num_datapoints.get()
-
-    # readData()
 
     print(adat[1:ndat], rdat[1:ndat])
     for iloop in range(1, iter + 1, 1):
@@ -614,14 +612,27 @@ def executeVES():
     s = 7
     plt.loglog(adat[1:ndat], rdat[1:ndat], 'bo',
                markersize=s)  # original data blue dots
-    # plt.show()
-    # plt.grid(True)
-    # sys.exit(0)
     return
 
+def viewModel():
+    global layerinputframe
+    global pkeep
+    global layers_choice
+    print("viewmodel output:")
+    for i in range(1, layers_choice, 1):
+        # print(i, pkeep[i], pkeep[layers_choice + i - 1])
+        # print(pkeep[i])
+        model_data = Label(layerinputframe, bg="gainsboro", text = str(pkeep[i]))
+        model_data.grid(row=3, column=3)
+
+    return
+
+# when plotCurves button pressed, plotCurves executes
 def plotCurves():
     global plt
     global sys
+
+    # show graph
     plt.show()
     plt.grid(True)
     sys.exit(0)
