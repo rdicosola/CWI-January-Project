@@ -26,6 +26,9 @@ from tkinter import filedialog
 
 # Constants
 
+# For rounding values when displaying them
+NDIGITS = 6
+
 # Schlumberger Filter
 FLTR1 = [0., .00046256, -.0010907, .0017122, -.0020687,
          .0043048, -.0021236, .015995, .017065, .098105, .21918, .64722,
@@ -83,7 +86,7 @@ u = [0] * 5000
 
 # Input
 algorithm_choice = 1
-SHCHLUMBERGER = 1
+SCHLUMBERGER = 1
 WENNER = 2
 layers_choice = 0  # number of layers
 n = 2 * layers_choice - 1
@@ -218,8 +221,6 @@ def openGUI():
                          command=plotCurves)
     plot_curves.grid(row=1, column=3, pady=5)
 
-    return
-
 
 def pickFile():
     global file_explore
@@ -234,7 +235,7 @@ def pickFile():
     global ndat
 
     # get file
-    resistivity_file =
+    resistivity_file = \
         filedialog.askopenfilename(initialdir="/",
                                    title="Open File",
                                    filetypes=(("Text Files", "*.txt"),
@@ -243,37 +244,45 @@ def pickFile():
     # set label by file button to resistivity file link
     file_view.config(text=resistivity_file)
 
-    # open the file
-    with open(resistivity_file, "r") as file_content:
-        file_list = file_content.readlines()
+    # open the file and read entire file into file_list.
+    file_handle = open(resistivity_file, "r")
+    file_list = file_handle.readlines()
 
+    # when printing, skip first 2 lines: data starts in line 3.
     for i in range(2, len(file_list)):
         print(file_list[i])
 
-    # split the file
-    if file_list[1].strip() == "1":
-        algorithm_choice = 1
-    elif file_list[1].strip() == "2":
-        algorithm_choice = 2
+    # algorithm to use is on line 1 (second line).
+    if int(file_list[1].strip()) == SCHLUMBERGER:
+        algorithm_choice = SCHLUMBERGER
+    elif int(file_list[1].strip()) == WENNER:
+        algorithm_choice = WENNER
+    else:
+        print('Algorithm choice on line 2 must be 1 or 2', file=stderr)
+        sys.exit(-1)
 
+    # for each data line
     for i in range(2, len(file_list)):
         fields = file_list[i].split()
-        spacing_val = fields[0].strip()
+        spacing_val = float(fields[0].strip())
         # print('-->' + spacing_val + '<--')
-        resis_val = fields[1].strip()
+        resis_val = float(fields[1].strip())
         # print('-->' + resis_val + '<--')
-        spacing_float = float(spacing_val)
-        resis_float = float(resis_val)
-        adat[i-2] = spacing_float
-        rdat[i-2] = resis_float
+        # indexes in these array start at 0, so subtract 2
 
+        # TODO: better name for adat or spacing_val?: what are these values?
+        adat[i-2] = spacing_val
+        rdat[i-2] = resis_val
+
+    # number of data values
     ndat = len(file_list) - 2
 
-    # old readData()
-    for i in range(1, ndat, 1):
+    # compute log10 values of adat and rdat
+    # TODO: the values in adatl and rdatl are indexed starting a 1: yuck!
+    # TODO: we don't convert adat[0] or rdat[0]... correct?
+    for i in range(1, ndat):
         adatl[i] = np.log10(adat[i])
         rdatl[i] = np.log10(rdat[i])
-    return
 
 # not used anymore. from the original code.
 # def readData():
@@ -377,8 +386,6 @@ def layerDetails():
             layerinputframe, textvariable=res_max_layer[i], width=10)
         res_max_data.grid(row=i+3, column=7)
 
-    return
-
 
 def error():
     sumerror = 0.
@@ -417,7 +424,6 @@ def transf(y, i):
         tpr = b * rs
         t[j] = (tpr + t[j-1]) / (1. + tpr * t[j-1] / (rs * rs))
     r[i] = t[layers_choice]
-    return
 
 
 def filters(b, k):
@@ -426,11 +432,10 @@ def filters(b, k):
         for j in range(1, k+1, 1):
             re = re + b[j] * r[i + k - j]
         r[i] = re
-    return
 
 
 def rmsfit():
-    if algorithm_choice == SHCHLUMBERGER:
+    if algorithm_choice == SCHLUMBERGER:
         y = spac - 19. * delx - 0.13069
         mum1 = m + 28
         for i in range(1, mum1 + 1, 1):
@@ -462,9 +467,7 @@ def rmsfit():
         rl[i] = np.log10(r[i])
         x = x + delx
         #print("%7.2f   %9.3f " % ( asav[i], r[i]))
-
     rms = error()
-
     return rms
 
 # my code to do a spline fit to predicted data at the nice spacing of Ghosh
@@ -506,8 +509,6 @@ def spline(n, yp1, ypn, x=[], y=[], y2=[]):
     for k in range(n - 1, -1, -1):
         y2[k] = y2[k] * y2[k + 1] + u[k]
 
-    return
-
 
 def splint(n, x, xa=[], ya=[], y2a=[]):
     klo = 0
@@ -527,7 +528,6 @@ def splint(n, x, xa=[], ya=[], y2a=[]):
     y = (a * ya[klo] + b * ya[khi] + ((a * a * a - a) * y2a[klo] +
                                       (b * b * b - b) * y2a[khi]) * (h * h) / 6.)
     #print("x=   ", x,"y=  ", y, "  ya=  ", ya[khi],"  y2a=  ", y2a[khi], "  h=  ",h)
-
     return y
 
 # when executeVES button pressed after information is inputed, executeVES will execute
@@ -627,30 +627,29 @@ def executeVES():
     s = 7
     plt.loglog(adat[1:ndat], rdat[1:ndat], 'bo',
                markersize=s)  # original data blue dots
-    return
 
 
 def viewModel():
+    '''Put computed values into the gui, in the middle columns'''
     global layerinputframe
     global pkeep
     global layers_choice
     global n			# 2 * layers_choice - 1
 
-    print('in VIEWMODEL: layers_choice = ', layers_choice)
     for i in range(1, layers_choice):
         print(i, pkeep[i], pkeep[layers_choice + i - 1])
         thickness_label = Label(
-            layerinputframe, bg="gainsboro", text=str(pkeep[i]))
+            layerinputframe, bg="gainsboro", text=str(round(pkeep[i], NDIGITS)))
         thickness_label.grid(row=2+i, column=3)
         thickness_label = Label(
-            layerinputframe, bg="gainsboro", text=str(pkeep[layers_choice + i - 1]))
+            layerinputframe, bg="gainsboro", text=str(round(pkeep[layers_choice + i - 1], NDIGITS)))
         thickness_label.grid(row=2+i, column=4)
 
     thickness_label = Label(
             layerinputframe, bg="gainsboro", text="Infinite")
     thickness_label.grid(row=2+layers_choice, column=3)
     thickness_label = Label(
-            layerinputframe, bg="gainsboro", text=str(pkeep[n]))
+            layerinputframe, bg="gainsboro", text=str(round(pkeep[n], NDIGITS)))
     thickness_label.grid(row=2+layers_choice, column=4)
 
 
@@ -663,7 +662,6 @@ def plotCurves():
     plt.show()
     plt.grid(True)
     sys.exit(0)
-    return
 
 
 # Main
