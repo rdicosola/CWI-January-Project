@@ -88,8 +88,8 @@ u = [0] * 5000
 algorithm_choice = 1
 SCHLUMBERGER = 1
 WENNER = 2
-num_layers = 0  # number of layers
-n = 2 * num_layers - 1
+layers_choice = 0  # number of layers
+n = 2 * layers_choice - 1
 iter = 10000  # number of iterations for the Monte Carlo guesses. to be input on GUI
 
 # this is where the range in parameters should be input from a GUI
@@ -137,14 +137,13 @@ while fctr > 1.:
 # GUI initialization
 mainwindow = Tk()
 mainwindow.title('VES Inverse Monte Carlo')
-mainwindow.configure(background="gainsboro")
 
 frame = Frame(mainwindow)
 frame.pack()
 
 # variables used for GUI
 algorithm_index = IntVar(mainwindow, 1)
-num_layers_var = IntVar(mainwindow, 3)
+num_layers = IntVar(mainwindow, 3)
 num_iter = IntVar(mainwindow, 10000)
 # num_datapoints = IntVar(mainwindow)
 # resistivity_file = StringVar()
@@ -154,7 +153,7 @@ num_iter = IntVar(mainwindow, 10000)
 
 def openGUI():
     global algorithm_choice
-    global num_layers
+    global layers_choice
     global n
     global iter
     global ndat
@@ -168,11 +167,11 @@ def openGUI():
     global ndat
 
     # file explore button
-    preframe = Frame(mainwindow, background="gainsboro")
+    preframe = Frame(mainwindow)
     preframe.pack(side=TOP, anchor=NW)
-    selected_file = Label(preframe, bg="gainsboro", text="Selected File Path")
+    selected_file = Label(preframe, text="Selected File Path")
     selected_file.grid(row=1, column=2)
-    file_view = Label(preframe, bg="gainsboro", text="No file",
+    file_view = Label(preframe, text="No file",
                       width=40, wraplength=220, justify="center")
     file_view.grid(row=2, column=2)
     file_explore = Button(preframe, text="Select Resistivity Data File",
@@ -180,36 +179,31 @@ def openGUI():
     file_explore.grid(row=1, column=1, rowspan=2)
 
     # drop down menu to pick number of layers
-    dropdown_label = Label(preframe, bg="gainsboro",
-                           text="Number of Layers", width=20)
+    dropdown_label = Label(preframe, text="Number of Layers", width=20)
     dropdown_label.grid(row=1, column=3)
     layerlist = [
         1, 2, 3, 4, 5
     ]
-    layersmenu = OptionMenu(preframe, num_layers_var, *layerlist)
-    layersmenu.config(bg="gainsboro")
+    layersmenu = OptionMenu(preframe, num_layers, *layerlist)
     layersmenu.grid(row=2, column=3)
-    # https://www.delftstack.com/howto/python-tkinter/how-to-create-dropdown-menu-in-tkinter/
-    # This is how we can detect if the menu selection has changed.
-    num_layers_var.trace("w", numLayersChanged)
 
     # box to enter number of iterations
-    iter_label = Label(preframe, bg="gainsboro",
-                       text="Number of Iterations", width=20)
+    iter_label = Label(preframe, text="Number of Iterations", width=20)
     iter_label.grid(row=1, column=4)
     iterentry = Entry(preframe, textvariable=num_iter, width=10)
     iterentry.grid(row=2, column=4, pady=5)
 
     # button to add details below for num layers
-    # layersframe = Frame(mainwindow, background="gainsboro")
-    #    layersframe.pack(side=TOP, anchor=NW)
-    #layer_details = Button(layersframe, text="Add layer details",
-    #                       command=layerDetails)
-    # layer_details.grid(row=1, columnspan=7, pady=5)
+    layersframe = Frame(mainwindow)
+    layersframe.pack(side=TOP, anchor=NW)
+    layer_details = Button(layersframe, text="Add layer details",
+                           command=layerDetails)
+    layer_details.grid(row=1, columnspan=7, pady=5)
 
     # execute VEScurves button
-    executionframe = Frame(mainwindow, background="gainsboro")
+    executionframe = Frame(mainwindow)
     executionframe.pack(side=BOTTOM, anchor=SW)
+
     execute_VES = Button(executionframe, text="Execute VEScurves",
                          command=executeVES)
     execute_VES.grid(row=1, column=1, pady=5)
@@ -223,10 +217,6 @@ def openGUI():
     plot_curves = Button(executionframe, text="Plot the Curves",
                          command=plotCurves)
     plot_curves.grid(row=1, column=3, pady=5)
-
-def numLayersChanged(*args):
-    print("numlayers changed. Now: ", num_layers_var.get())
-    layerDetails()
 
 
 def pickFile():
@@ -304,7 +294,7 @@ def pickFile():
 
 
 def layerDetails():
-    global num_layers
+    global layers_choice
     global thick_min_layer
     global thick_max_layer
     global res_min_layer
@@ -312,51 +302,51 @@ def layerDetails():
     global layerinputframe
 
     # set number of layers
-    num_layers = num_layers_var.get()
+    layers_choice = num_layers.get()
 
     # initialize arrays
-    thick_min_layer = [0] * (num_layers - 1)
-    thick_max_layer = [0] * (num_layers - 1)
-    res_min_layer = [0] * (num_layers)
-    res_max_layer = [0] * (num_layers)
+    thick_min_layer = [0]*(layers_choice - 1)
+    thick_max_layer = [0]*(layers_choice - 1)
+    res_min_layer = [0]*(layers_choice)
+    res_max_layer = [0]*(layers_choice)
 
     # full frame
-    layerinputframe = Frame(mainwindow, background="gainsboro")
+    layerinputframe = Frame(mainwindow)
     layerinputframe.pack(side=BOTTOM, anchor=SW)
 
     # note while working on functionality
-    note_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 7),
+    note_label = Label(layerinputframe, font=("TkDefaultFont", 7),
                        text="  --> For predictable results, enter 1 10 5 75 20 2 500 200 100 3000")
     note_label.grid(row=8, column=1, columnspan=3, pady=5)
 
     # thickness range
-    thickness_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
+    thickness_label = Label(layerinputframe, font=("TkDefaultFont", 13),
                             text="Model Range in Thickness (m)")
     thickness_label.grid(row=1, column=1, columnspan=3, pady=5)
 
     # resistivity range
-    resistivity = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
+    resistivity = Label(layerinputframe, font=("TkDefaultFont", 13),
                         text="Model Range in Resistivity (m)")
     resistivity.grid(row=1, column=5, columnspan=3, pady=5)
 
     # thickness minimum values
-    thick_min_label = Label(layerinputframe, bg="gainsboro",
+    thick_min_label = Label(layerinputframe,
                             text="Minimum\nValue", width=15)
     thick_min_label.grid(row=2, column=1)
-    for i in range(0, num_layers - 1, 1):
+    for i in range(0, layers_choice - 1, 1):
         thick_min_layer[i] = IntVar(mainwindow)
         thick_min_data = Entry(
             layerinputframe, textvariable=thick_min_layer[i], width=10)
         thick_min_data.grid(row=i+3, column=1)
     infinite_label = Label(layerinputframe, bg="gainsboro",
                            text="Infinite Thickness")
-    infinite_label.grid(row=num_layers+2, column=1, columnspan=2)
+    infinite_label.grid(row=layers_choice+2, column=1, columnspan=2)
 
     # thickness maximum values
     thick_max_label = Label(layerinputframe, bg="gainsboro",
                             text="Maximum\nValue", width=15)
     thick_max_label.grid(row=2, column=2)
-    for i in range(0, num_layers - 1, 1):
+    for i in range(0, layers_choice - 1, 1):
         thick_max_layer[i] = IntVar(mainwindow)
         thick_max_data = Entry(
             layerinputframe, textvariable=thick_max_layer[i], width=10)
@@ -376,7 +366,7 @@ def layerDetails():
     res_min_label = Label(layerinputframe, bg="gainsboro",
                           text="Minimum\nValue", width=15)
     res_min_label.grid(row=2, column=6)
-    for i in range(0, num_layers, 1):
+    for i in range(0, layers_choice, 1):
         res_min_layer[i] = IntVar(mainwindow)
         res_min_data = Entry(
             layerinputframe, textvariable=res_min_layer[i], width=10)
@@ -386,8 +376,8 @@ def layerDetails():
     res_max_label = Label(layerinputframe, bg="gainsboro",
                           text="Maximum\nValue", width=15)
     res_max_label.grid(row=2, column=7)
-    res_max_list = [0] * num_layers
-    for i in range(0, num_layers, 1):
+    res_max_list = [0] * layers_choice
+    for i in range(0, layers_choice, 1):
         res_max_layer[i] = IntVar(mainwindow)
         res_max_data = Entry(
             layerinputframe, textvariable=res_max_layer[i], width=10)
@@ -421,8 +411,8 @@ def error():
 def transf(y, i):
     u = 1. / np.exp(y)
     t[1] = p[n]
-    for j in range(2, num_layers+1, 1):
-        pwr = -2. * u * p[num_layers+1-j]
+    for j in range(2, layers_choice+1, 1):
+        pwr = -2. * u * p[layers_choice+1-j]
         if pwr < np.log(2. * ep):
             pwr = np.log(2. * ep)
         a = np.exp(pwr)
@@ -430,7 +420,7 @@ def transf(y, i):
         rs = p[n + 1 - j]
         tpr = b * rs
         t[j] = (tpr + t[j-1]) / (1. + tpr * t[j-1] / (rs * rs))
-    r[i] = t[num_layers]
+    r[i] = t[layers_choice]
 
 
 def filters(b, k):
@@ -544,8 +534,8 @@ def executeVES():
     # will cut down global variables in future
     global iter
     global num_iter
+    global layers_choice
     global num_layers
-    global num_layers_var
     global n
     global small
     global xlarge
@@ -572,27 +562,27 @@ def executeVES():
     iter = num_iter.get()
 
     # get number of layers
-    num_layers = num_layers_var.get()
-    n = 2 * num_layers - 1
+    layers_choice = num_layers.get()
+    n = 2 * layers_choice - 1
 
     # set small[] and xlarge[]
-    for i in range(num_layers - 1):
+    for i in range(layers_choice - 1):
         small[i + 1] = thick_min_layer[i].get()
-    for i in range(num_layers - 1):
+    for i in range(layers_choice - 1):
         xlarge[i + 1] = thick_max_layer[i].get()
-    for i in range(num_layers):
-        small[i + num_layers] = res_min_layer[i].get()
-    for i in range(num_layers):
-        xlarge[i + num_layers] = res_max_layer[i].get()
+    for i in range(layers_choice):
+        small[i + layers_choice] = res_min_layer[i].get()
+    for i in range(layers_choice):
+        xlarge[i + layers_choice] = res_max_layer[i].get()
 
     print(adat[1:ndat], rdat[1:ndat])
     for iloop in range(1, iter + 1, 1):
         #print( '  iloop is ', iloop)
-        for i in range(1, num_layers + 1):
+        for i in range(1, layers_choice + 1):
             randNumber = random.random()
             #print(randNumber, '  random')
             p[i] = (xlarge[i] - small[i]) * randNumber + small[i]
-        for i in range(num_layers + 1, n + 1):
+        for i in range(layers_choice + 1, n + 1):
             randNumber = random.random()
             #print(randNumber, '  random')
             p[i] = (xlarge[i] - small[i]) * randNumber + small[i]
@@ -613,9 +603,9 @@ def executeVES():
 
 # output the best fitting earth model
     print(' Layer ', '     Thickness  ', '   Res_ohm-m  ')
-    for i in range(1, num_layers):
-        print(i, pkeep[i], pkeep[num_layers + i - 1])
-    print(num_layers, '  Infinite ', pkeep[n])
+    for i in range(1, layers_choice):
+        print(i, pkeep[i], pkeep[layers_choice + i - 1])
+    print(layers_choice, '  Infinite ', pkeep[n])
 
     for i in range(1, m + 1):
         asavl[i] = np.log10(asav[i])
@@ -640,35 +630,31 @@ def viewModel():
     '''Put computed values into the gui, in the middle columns'''
     global layerinputframe
     global pkeep
-    global num_layers
-    global n			# 2 * num_layers - 1
+    global layers_choice
+    global n			# 2 * layers_choice - 1
 
-    for i in range(1, num_layers):
-        print(i, pkeep[i], pkeep[num_layers + i - 1])
+    for i in range(1, layers_choice):
+        print(i, pkeep[i], pkeep[layers_choice + i - 1])
         thickness_label = Label(
             layerinputframe, bg="gainsboro", text=str(round(pkeep[i], NDIGITS)))
         thickness_label.grid(row=2+i, column=3)
         thickness_label = Label(
-            layerinputframe, bg="gainsboro", text=str(round(pkeep[num_layers + i - 1], NDIGITS)))
+            layerinputframe, bg="gainsboro", text=str(round(pkeep[layers_choice + i - 1], NDIGITS)))
         thickness_label.grid(row=2+i, column=4)
 
     thickness_label = Label(
             layerinputframe, bg="gainsboro", text="Infinite")
-    thickness_label.grid(row=2+num_layers, column=3)
+    thickness_label.grid(row=2+layers_choice, column=3)
     thickness_label = Label(
             layerinputframe, bg="gainsboro", text=str(round(pkeep[n], NDIGITS)))
-    thickness_label.grid(row=2+num_layers, column=4)
+    thickness_label.grid(row=2+layers_choice, column=4)
 
 
 # when plotCurves button pressed, plotCurves executes
 def plotCurves():
-    global plt
-    global sys
-
-    # show graph
+    '''Use matplotlib to display graph'''
     plt.show()
     plt.grid(True)
-    sys.exit(0)
 
 
 # Main
