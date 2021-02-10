@@ -13,9 +13,10 @@ GUI Implementation Additions
 Created Winter 2021
 
 @author: Rebecca DiCosola
+@author: Victor Norman
 """
 
-# Imports
+
 import numpy as np
 import random
 import matplotlib.pyplot as plt
@@ -24,7 +25,8 @@ from tkinter import *
 from tkinter import filedialog
 
 # Constants
-# Schlumberger filter
+
+# Schlumberger Filter
 FLTR1 = [0., .00046256, -.0010907, .0017122, -.0020687,
          .0043048, -.0021236, .015995, .017065, .098105, .21918, .64722,
          1.1415, .47819, -3.515, 2.7743, -1.201, .4544, -.19427, .097364,
@@ -145,6 +147,8 @@ num_iter = IntVar(mainwindow, 10000)
 # resistivity_file = StringVar()
 
 # function definitions
+
+
 def openGUI():
     global algorithm_choice
     global layers_choice
@@ -163,17 +167,18 @@ def openGUI():
     # file explore button
     preframe = Frame(mainwindow, background="gainsboro")
     preframe.pack(side=TOP, anchor=NW)
-    selected_file = Label(preframe, bg="gainsboro", text = "Selected File Path")
+    selected_file = Label(preframe, bg="gainsboro", text="Selected File Path")
     selected_file.grid(row=1, column=2)
-    file_view = Label(preframe, bg="gainsboro", text = "No file", width=40, wraplength=220, justify="center")
+    file_view = Label(preframe, bg="gainsboro", text="No file",
+                      width=40, wraplength=220, justify="center")
     file_view.grid(row=2, column=2)
-    file_explore = Button(preframe, text = "Select Resistivity Data File",
-                        command = pickFile)
+    file_explore = Button(preframe, text="Select Resistivity Data File",
+                          command=pickFile)
     file_explore.grid(row=1, column=1, rowspan=2)
 
     # drop down menu to pick number of layers
     dropdown_label = Label(preframe, bg="gainsboro",
-                  text="Number of Layers", width=20)
+                           text="Number of Layers", width=20)
     dropdown_label.grid(row=1, column=3)
     layerlist = [
         1, 2, 3, 4, 5
@@ -184,7 +189,7 @@ def openGUI():
 
     # box to enter number of iterations
     iter_label = Label(preframe, bg="gainsboro",
-                  text="Number of Iterations", width=20)
+                       text="Number of Iterations", width=20)
     iter_label.grid(row=1, column=4)
     iterentry = Entry(preframe, textvariable=num_iter, width=10)
     iterentry.grid(row=2, column=4, pady=5)
@@ -192,28 +197,29 @@ def openGUI():
     # button to add details below for num layers
     layersframe = Frame(mainwindow, background="gainsboro")
     layersframe.pack(side=TOP, anchor=NW)
-    layer_details = Button(layersframe, text = "Add layer details",
-                        command = layerDetails)
+    layer_details = Button(layersframe, text="Add layer details",
+                           command=layerDetails)
     layer_details.grid(row=1, columnspan=7, pady=5)
 
     # execute VEScurves button
     executionframe = Frame(mainwindow, background="gainsboro")
     executionframe.pack(side=BOTTOM, anchor=SW)
-    execute_VES = Button(executionframe, text = "Execute VEScurves",
-                        command = executeVES)
+    execute_VES = Button(executionframe, text="Execute VEScurves",
+                         command=executeVES)
     execute_VES.grid(row=1, column=1, pady=5)
 
     # view predicted model button
-    view_model = Button(executionframe, text = "View Predicted Model",
-                        command = viewModel)
+    view_model = Button(executionframe, text="View Predicted Model",
+                        command=viewModel)
     view_model.grid(row=1, column=2, pady=5)
 
     # plot curves button
-    plot_curves = Button(executionframe, text = "Plot the Curves",
-                        command = plotCurves)
+    plot_curves = Button(executionframe, text="Plot the Curves",
+                         command=plotCurves)
     plot_curves.grid(row=1, column=3, pady=5)
 
     return
+
 
 def pickFile():
     global file_explore
@@ -228,17 +234,18 @@ def pickFile():
     global ndat
 
     # get file
-    resistivity_file = filedialog.askopenfilename(initialdir="/",
-                        title="Open File",
-                        filetypes=(("Text Files", "*.txt"),
-                        ("All Files", "*.*")))
+    resistivity_file =
+        filedialog.askopenfilename(initialdir="/",
+                                   title="Open File",
+                                   filetypes=(("Text Files", "*.txt"),
+                                              ("All Files", "*.*")))
 
     # set label by file button to resistivity file link
     file_view.config(text=resistivity_file)
 
     # open the file
     with open(resistivity_file, "r") as file_content:
-	    file_list = file_content.readlines()
+        file_list = file_content.readlines()
 
     for i in range(2, len(file_list)):
         print(file_list[i])
@@ -279,6 +286,7 @@ def pickFile():
 #         print(rdatl[i])
 #     return
 
+
 def layerDetails():
     global layers_choice
     global thick_min_layer
@@ -302,70 +310,75 @@ def layerDetails():
 
     # note while working on functionality
     note_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 7),
-                  text="  --> For predictable results, enter 1 10 5 75 20 2 500 200 100 3000")
+                       text="  --> For predictable results, enter 1 10 5 75 20 2 500 200 100 3000")
     note_label.grid(row=8, column=1, columnspan=3, pady=5)
 
     # thickness range
     thickness_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
-                  text="Model Range in Thickness (m)")
+                            text="Model Range in Thickness (m)")
     thickness_label.grid(row=1, column=1, columnspan=3, pady=5)
 
     # resistivity range
     resistivity = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
-                  text="Model Range in Resistivity (m)")
+                        text="Model Range in Resistivity (m)")
     resistivity.grid(row=1, column=5, columnspan=3, pady=5)
 
     # thickness minimum values
     thick_min_label = Label(layerinputframe, bg="gainsboro",
-                  text="Minimum\nValue", width=15)
+                            text="Minimum\nValue", width=15)
     thick_min_label.grid(row=2, column=1)
     for i in range(0, layers_choice - 1, 1):
         thick_min_layer[i] = IntVar(mainwindow)
-        thick_min_data = Entry(layerinputframe, textvariable=thick_min_layer[i], width=10)
+        thick_min_data = Entry(
+            layerinputframe, textvariable=thick_min_layer[i], width=10)
         thick_min_data.grid(row=i+3, column=1)
     infinite_label = Label(layerinputframe, bg="gainsboro",
-                  text="Infinite Thickness")
+                           text="Infinite Thickness")
     infinite_label.grid(row=layers_choice+2, column=1, columnspan=2)
 
     # thickness maximum values
     thick_max_label = Label(layerinputframe, bg="gainsboro",
-                  text="Maximum\nValue", width=15)
+                            text="Maximum\nValue", width=15)
     thick_max_label.grid(row=2, column=2)
     for i in range(0, layers_choice - 1, 1):
         thick_max_layer[i] = IntVar(mainwindow)
-        thick_max_data = Entry(layerinputframe, textvariable=thick_max_layer[i], width=10)
+        thick_max_data = Entry(
+            layerinputframe, textvariable=thick_max_layer[i], width=10)
         thick_max_data.grid(row=i+3, column=2)
 
     # thickness predictions
     thick_pred_label = Label(layerinputframe, bg="gainsboro",
-                  text="Thickness\nPrediction", width=15)
+                             text="Thickness\nPrediction", width=15)
     thick_pred_label.grid(row=2, column=3)
 
     # resistivity predictions
     res_pred_label = Label(layerinputframe, bg="gainsboro",
-                  text="Resistivity\nPrediction", width=15)
-    res_pred_label.grid(row=2, column=5)
+                           text="Resistivity\nPrediction", width=15)
+    res_pred_label.grid(row=2, column=4)
 
     # resistivity minimum values
     res_min_label = Label(layerinputframe, bg="gainsboro",
-                  text="Minimum\nValue", width=15)
+                          text="Minimum\nValue", width=15)
     res_min_label.grid(row=2, column=6)
     for i in range(0, layers_choice, 1):
         res_min_layer[i] = IntVar(mainwindow)
-        res_min_data = Entry(layerinputframe, textvariable=res_min_layer[i], width=10)
+        res_min_data = Entry(
+            layerinputframe, textvariable=res_min_layer[i], width=10)
         res_min_data.grid(row=i+3, column=6)
 
     # resistivity maximum values
     res_max_label = Label(layerinputframe, bg="gainsboro",
-                  text="Maximum\nValue", width=15)
+                          text="Maximum\nValue", width=15)
     res_max_label.grid(row=2, column=7)
     res_max_list = [0] * layers_choice
     for i in range(0, layers_choice, 1):
         res_max_layer[i] = IntVar(mainwindow)
-        res_max_data = Entry(layerinputframe, textvariable=res_max_layer[i], width=10)
+        res_max_data = Entry(
+            layerinputframe, textvariable=res_max_layer[i], width=10)
         res_max_data.grid(row=i+3, column=7)
 
     return
+
 
 def error():
     sumerror = 0.
@@ -518,6 +531,8 @@ def splint(n, x, xa=[], ya=[], y2a=[]):
     return y
 
 # when executeVES button pressed after information is inputed, executeVES will execute
+
+
 def executeVES():
     # will cut down global variables in future
     global iter
@@ -554,23 +569,23 @@ def executeVES():
     n = 2 * layers_choice - 1
 
     # set small[] and xlarge[]
-    for i in range (layers_choice - 1):
+    for i in range(layers_choice - 1):
         small[i + 1] = thick_min_layer[i].get()
-    for i in range (layers_choice - 1):
+    for i in range(layers_choice - 1):
         xlarge[i + 1] = thick_max_layer[i].get()
-    for i in range (layers_choice):
+    for i in range(layers_choice):
         small[i + layers_choice] = res_min_layer[i].get()
-    for i in range (layers_choice):
+    for i in range(layers_choice):
         xlarge[i + layers_choice] = res_max_layer[i].get()
 
     print(adat[1:ndat], rdat[1:ndat])
     for iloop in range(1, iter + 1, 1):
         #print( '  iloop is ', iloop)
-        for i in range(1, layers_choice + 1, 1):
+        for i in range(1, layers_choice + 1):
             randNumber = random.random()
             #print(randNumber, '  random')
             p[i] = (xlarge[i] - small[i]) * randNumber + small[i]
-        for i in range(layers_choice + 1, n + 1, 1):
+        for i in range(layers_choice + 1, n + 1):
             randNumber = random.random()
             #print(randNumber, '  random')
             p[i] = (xlarge[i] - small[i]) * randNumber + small[i]
@@ -579,23 +594,23 @@ def executeVES():
 
         if rms < errmin:
             print('rms  ', rms, '   errmin ', errmin)
-            for i in range(1, n+1, 1):
+            for i in range(1, n+1):
                 pkeep[i] = p[i]
-            for i in range(1, m+1, 1):
+            for i in range(1, m+1):
                 rkeep[i] = r[i]
                 rkeepl[i] = rl[i]
-            for i in range(1, ndat + 1, 1):
+            for i in range(1, ndat + 1):
                 pltanswerkeepl[i] = pltanswerl[i]
                 pltanswerkeep[i] = pltanswer[i]
             errmin = rms
 
 # output the best fitting earth model
     print(' Layer ', '     Thickness  ', '   Res_ohm-m  ')
-    for i in range(1, layers_choice, 1):
+    for i in range(1, layers_choice):
         print(i, pkeep[i], pkeep[layers_choice + i - 1])
-
     print(layers_choice, '  Infinite ', pkeep[n])
-    for i in range(1, m + 1, 1):
+
+    for i in range(1, m + 1):
         asavl[i] = np.log10(asav[i])
 
 # output the error of fit
@@ -614,18 +629,30 @@ def executeVES():
                markersize=s)  # original data blue dots
     return
 
+
 def viewModel():
     global layerinputframe
     global pkeep
     global layers_choice
-    print("viewmodel output:")
-    for i in range(1, layers_choice, 1):
-        # print(i, pkeep[i], pkeep[layers_choice + i - 1])
-        # print(pkeep[i])
-        model_data = Label(layerinputframe, bg="gainsboro", text = str(pkeep[i]))
-        model_data.grid(row=3, column=3)
+    global n			# 2 * layers_choice - 1
 
-    return
+    print('in VIEWMODEL: layers_choice = ', layers_choice)
+    for i in range(1, layers_choice):
+        print(i, pkeep[i], pkeep[layers_choice + i - 1])
+        thickness_label = Label(
+            layerinputframe, bg="gainsboro", text=str(pkeep[i]))
+        thickness_label.grid(row=2+i, column=3)
+        thickness_label = Label(
+            layerinputframe, bg="gainsboro", text=str(pkeep[layers_choice + i - 1]))
+        thickness_label.grid(row=2+i, column=4)
+
+    thickness_label = Label(
+            layerinputframe, bg="gainsboro", text="Infinite")
+    thickness_label.grid(row=2+layers_choice, column=3)
+    thickness_label = Label(
+            layerinputframe, bg="gainsboro", text=str(pkeep[n]))
+    thickness_label.grid(row=2+layers_choice, column=4)
+
 
 # when plotCurves button pressed, plotCurves executes
 def plotCurves():
