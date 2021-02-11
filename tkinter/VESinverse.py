@@ -428,19 +428,14 @@ def openGUI():
 
     executionframe = Frame(mainwindow, background="gainsboro")
     executionframe.pack(side=BOTTOM, anchor=SW)
-    execute_VES = Button(executionframe, text="Execute VEScurves",
-                         command=executeVES)
-    execute_VES.grid(row=1, column=1, pady=5)
-
-    # view predicted model button
-    view_model = Button(executionframe, text="View Predicted Model",
-                        command=viewModel)
-    view_model.grid(row=1, column=2, pady=5)
+    execute_VES = Button(executionframe, text="Compute Predictions",
+                         command=computePredictions)
+    execute_VES.grid(row=1, column=1, padx=10, pady=5)
 
     # plot curves button
     plot_curves = Button(executionframe, text="Plot the Curves",
                          command=plotCurves)
-    plot_curves.grid(row=1, column=3, pady=5)
+    plot_curves.grid(row=1, column=2, padx=10, pady=5)
 
 
 def displayChosenLayers(old_num_layers, curr_num_layers):
@@ -562,8 +557,8 @@ def pickFile():
 #     return
 
 
-def executeVES():
-    '''when executeVES button pressed after information is inputed, executeVES will execute'''
+def computePredictions():
+    '''compute predictions'''
 
     # will cut down global variables in future
     global iter
@@ -658,6 +653,8 @@ def executeVES():
     s = 7
     plt.loglog(adat[1:ndat], rdat[1:ndat], 'bo',
                markersize=s)  # original data blue dots
+
+    viewModel()
 
 
 def viewModel():
