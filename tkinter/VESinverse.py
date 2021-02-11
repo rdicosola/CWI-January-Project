@@ -23,10 +23,9 @@ from tkinter import *
 from tkinter import filedialog
 
 
-# Constants
+# ------------------ CONSTANTS -----------------------------
 
 # For rounding values when displaying them
-
 NDIGITS = 6
 
 # Schlumberger Filter
@@ -44,14 +43,19 @@ FLTR2 = [0., .000238935, .00011557, .00017034, .00024935,
          -.32026, -.53557, .51787, -.196, .054394, -.015747, .0053941,
          -.0021446, .000665125]
 
+MAX_LAYERS = 5
+
 # Array size
 # 65 is completely arbitrary
 ARRAYSIZE = 65
 
+SCHLUMBERGER = 1
+WENNER = 2
+
+
 # I know there must be a better method to assign lists. And probably numpy
 # arrays would be best. But my Python wasn't up to it. If the last letter
 # is an 'l' that means it is a log10 of the value
-
 p = [0] * 20
 r = [0] * ARRAYSIZE
 rl = [0] * ARRAYSIZE
@@ -86,8 +90,6 @@ u = [0] * 5000
 
 # Input
 algorithm_choice = 1
-SCHLUMBERGER = 1
-WENNER = 2
 num_layers = 0  # number of layers
 n = 2 * num_layers - 1
 iter = 10000  # number of iterations for the Monte Carlo guesses. to be input on GUI
@@ -134,11 +136,8 @@ while fctr > 1.:
     ep = ep / 2.0
     fctr = ep + 1.
 
-# num_datapoints = IntVar(mainwindow)
-# resistivity_file = StringVar()
 
-# function definitions
-
+# ------------------- Function definitions --------------------------
 
 def error():
     sumerror = 0.
@@ -208,8 +207,8 @@ def rmsfit():
             y = y + delx
         filters(FLTR2, 34)
     else:
-        print(" type of survey not indicated")
-        sys.exit()
+        print("type of survey not indicated")
+        sys.exit(-1)
 
     x = spac
     #print("A-Spacing   App. Resistivity")
@@ -223,13 +222,13 @@ def rmsfit():
     rms = error()
     return rms
 
-# my code to do a spline fit to predicted data at the nice spacing of Ghosh
-# use splint to determine the spline interpolated prediction at the
-# spacing where the measured resistivity was taken - to compare observation
-# to prediction
-
 
 def spline(n, yp1, ypn, x=[], y=[], y2=[]):
+    '''my code to do a spline fit to predicted data at the nice spacing of Ghosh
+    use splint to determine the spline interpolated prediction at the
+    spacing where the measured resistivity was taken - to compare observation
+    to prediction'''
+
     u = [0] * 1000
     one29 = 0.99e30
     #print(x, y)
@@ -298,7 +297,11 @@ def openGUI():
     global rdat
     global adat
     global ndat
-    global test_label
+    global thick_min_layer
+    global thick_max_layer
+    global res_min_layer
+    global res_max_layer
+    global layerinputframe
 
     # file explore button
     preframe = Frame(mainwindow, background="gainsboro")
@@ -316,12 +319,12 @@ def openGUI():
     dropdown_label = Label(preframe, bg="gainsboro",
                            text="Number of Layers", width=20)
     dropdown_label.grid(row=1, column=3)
-    layerlist = [
-        1, 2, 3, 4, 5
-    ]
+
+    layerlist = list(range(1, MAX_LAYERS + 1))
     layersmenu = OptionMenu(preframe, num_layers_var, *layerlist)
     layersmenu.config(bg="gainsboro")
     layersmenu.grid(row=2, column=3)
+
     # https://www.delftstack.com/howto/python-tkinter/how-to-create-dropdown-menu-in-tkinter/
     # This is how we can detect if the menu selection has changed.
     num_layers_var.trace("w", numLayersChanged)
@@ -333,7 +336,94 @@ def openGUI():
     iterentry = Entry(preframe, textvariable=num_iter, width=10)
     iterentry.grid(row=2, column=4, pady=5)
 
-    # execute VEScurves button
+    # set number of layers
+    num_layers = num_layers_var.get()
+
+    # initialize arrays
+    thick_min_layer = []  # [0] * (num_layers - 1)
+    thick_max_layer = []  # [0] * (num_layers - 1)
+    res_min_layer = []    # [0] * num_layers
+    res_max_layer = []    # [0] * num_layers
+
+    # ------------- Area showing layer input entry boxes and computed output -------------
+
+    # store num_layers in a global variable so that when it is changed
+    # we can see the old value.  We will create input and output boxes for
+    # all MAX_LAYERS layers, but only display the ones for num_layers. When the value
+    # changes we'll display or hide boxes.
+    global curr_num_layers
+    curr_num_layers = num_layers
+
+    layerinputframe = Frame(mainwindow, background="gainsboro")
+    layerinputframe.pack(side=TOP, anchor=SW)
+
+    # thickness and resistivity labels
+    Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
+          text="Model Range in Thickness (m)").grid(row=1, column=1, columnspan=3, pady=5)
+    Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
+          text="Model Range in Resistivity (m)").grid(row=1, column=5, columnspan=3, pady=5)
+
+    # thickness minimum values
+    thick_min_label = Label(layerinputframe, bg="gainsboro",
+                            text="Minimum\nValue", width=15)
+    thick_min_label.grid(row=2, column=1)
+    for i in range(num_layers - 1):
+        thick_min_layer.append(IntVar(mainwindow))
+        thick_min_data = Entry(
+            layerinputframe, textvariable=thick_min_layer[i], width=10)
+        thick_min_data.grid(row=i+3, column=1)
+    infinite_label = Label(layerinputframe, bg="gainsboro",
+                           text="Infinite Thickness")
+    infinite_label.grid(row=num_layers+2, column=1, columnspan=2)
+
+    # thickness maximum values
+    thick_max_label = Label(layerinputframe, bg="gainsboro",
+                            text="Maximum\nValue", width=15)
+    thick_max_label.grid(row=2, column=2)
+    for i in range(num_layers - 1):
+        thick_max_layer.append(IntVar(mainwindow))
+        thick_max_data = Entry(
+            layerinputframe, textvariable=thick_max_layer[i], width=10)
+        thick_max_data.grid(row=i+3, column=2)
+
+    # thickness predictions
+    thick_pred_label = Label(layerinputframe, bg="gainsboro",
+                             text="Thickness\nPrediction", width=15)
+    thick_pred_label.grid(row=2, column=3)
+
+    # resistivity predictions
+    res_pred_label = Label(layerinputframe, bg="gainsboro",
+                           text="Resistivity\nPrediction", width=15)
+    res_pred_label.grid(row=2, column=4)
+
+    # resistivity minimum values
+    res_min_label = Label(layerinputframe, bg="gainsboro",
+                          text="Minimum\nValue", width=15)
+    res_min_label.grid(row=2, column=6)
+    for i in range(num_layers):
+        res_min_layer.append(IntVar(mainwindow))
+        res_min_data = Entry(
+            layerinputframe, textvariable=res_min_layer[i], width=10)
+        res_min_data.grid(row=i+3, column=6)
+
+    # resistivity maximum values
+    res_max_label = Label(layerinputframe, bg="gainsboro",
+                          text="Maximum\nValue", width=15)
+    res_max_label.grid(row=2, column=7)
+
+    for i in range(num_layers):
+        res_max_layer.append(IntVar(mainwindow))
+        res_max_data = Entry(
+            layerinputframe, textvariable=res_max_layer[i], width=10)
+        res_max_data.grid(row=i+3, column=7)
+
+    # note while testing
+    note_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 7),
+                       text="  --> For predictable results, enter 1 10 5 75 20 2 500 200 100 3000")
+    note_label.grid(row=8, column=1, columnspan=3, pady=5)
+
+    # ------------------ Buttons at the bottom ----------------------
+
     executionframe = Frame(mainwindow, background="gainsboro")
     executionframe.pack(side=BOTTOM, anchor=SW)
     execute_VES = Button(executionframe, text="Execute VEScurves",
@@ -353,7 +443,6 @@ def openGUI():
 
 def numLayersChanged(*args):
     print("numlayers changed. Now: ", num_layers_var.get())
-    layerDetails()
 
 
 def pickFile():
@@ -428,97 +517,6 @@ def pickFile():
 #         rdatl[i] = np.log10(rdat[i])
 #         print(rdatl[i])
 #     return
-
-
-def layerDetails():
-    global num_layers
-    global thick_min_layer
-    global thick_max_layer
-    global res_min_layer
-    global res_max_layer
-    global layerinputframe
-
-    # set number of layers
-    num_layers = num_layers_var.get()
-
-    # initialize arrays
-    thick_min_layer = []  # [0] * (num_layers - 1)
-    thick_max_layer = []  # [0] * (num_layers - 1)
-    res_min_layer = []    # [0] * num_layers
-    res_max_layer = []    # [0] * num_layers
-
-    # full frame
-    layerinputframe = Frame(mainwindow, background="gainsboro")
-    layerinputframe.pack(side=BOTTOM, anchor=SW)
-
-    # note while working on functionality
-    note_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 7),
-                       text="  --> For predictable results, enter 1 10 5 75 20 2 500 200 100 3000")
-    note_label.grid(row=8, column=1, columnspan=3, pady=5)
-
-    # thickness range
-    thickness_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
-                            text="Model Range in Thickness (m)")
-    thickness_label.grid(row=1, column=1, columnspan=3, pady=5)
-
-    # resistivity range
-    resistivity = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 13),
-                        text="Model Range in Resistivity (m)")
-    resistivity.grid(row=1, column=5, columnspan=3, pady=5)
-
-    # thickness minimum values
-    thick_min_label = Label(layerinputframe, bg="gainsboro",
-                            text="Minimum\nValue", width=15)
-    thick_min_label.grid(row=2, column=1)
-    for i in range(num_layers - 1):
-        thick_min_layer.append(IntVar(mainwindow))
-        thick_min_data = Entry(
-            layerinputframe, textvariable=thick_min_layer[i], width=10)
-        thick_min_data.grid(row=i+3, column=1)
-    infinite_label = Label(layerinputframe, bg="gainsboro",
-                           text="Infinite Thickness")
-    infinite_label.grid(row=num_layers+2, column=1, columnspan=2)
-
-    # thickness maximum values
-    thick_max_label = Label(layerinputframe, bg="gainsboro",
-                            text="Maximum\nValue", width=15)
-    thick_max_label.grid(row=2, column=2)
-    for i in range(num_layers - 1):
-        thick_max_layer.append(IntVar(mainwindow))
-        thick_max_data = Entry(
-            layerinputframe, textvariable=thick_max_layer[i], width=10)
-        thick_max_data.grid(row=i+3, column=2)
-
-    # thickness predictions
-    thick_pred_label = Label(layerinputframe, bg="gainsboro",
-                             text="Thickness\nPrediction", width=15)
-    thick_pred_label.grid(row=2, column=3)
-
-    # resistivity predictions
-    res_pred_label = Label(layerinputframe, bg="gainsboro",
-                           text="Resistivity\nPrediction", width=15)
-    res_pred_label.grid(row=2, column=4)
-
-    # resistivity minimum values
-    res_min_label = Label(layerinputframe, bg="gainsboro",
-                          text="Minimum\nValue", width=15)
-    res_min_label.grid(row=2, column=6)
-    for i in range(num_layers):
-        res_min_layer.append(IntVar(mainwindow))
-        res_min_data = Entry(
-            layerinputframe, textvariable=res_min_layer[i], width=10)
-        res_min_data.grid(row=i+3, column=6)
-
-    # resistivity maximum values
-    res_max_label = Label(layerinputframe, bg="gainsboro",
-                          text="Maximum\nValue", width=15)
-    res_max_label.grid(row=2, column=7)
-
-    for i in range(num_layers):
-        res_max_layer.append(IntVar(mainwindow))
-        res_max_data = Entry(
-            layerinputframe, textvariable=res_max_layer[i], width=10)
-        res_max_data.grid(row=i+3, column=7)
 
 
 def executeVES():
