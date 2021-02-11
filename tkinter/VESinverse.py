@@ -364,42 +364,36 @@ def openGUI():
           text="Model Range in Resistivity (m)").grid(row=1, column=5, columnspan=3, pady=5)
 
     # thickness minimum values
-    thick_min_label = Label(layerinputframe, bg="gainsboro",
-                            text="Minimum\nValue", width=15)
-    thick_min_label.grid(row=2, column=1)
+    Label(layerinputframe, bg="gainsboro",
+          text="Minimum\nValue", width=15).grid(row=2, column=1)
+
     for i in range(num_layers - 1):
         thick_min_layer.append(IntVar(mainwindow))
         thick_min_data = Entry(
             layerinputframe, textvariable=thick_min_layer[i], width=10)
         thick_min_data.grid(row=i+3, column=1)
-    infinite_label = Label(layerinputframe, bg="gainsboro",
-                           text="Infinite Thickness")
-    infinite_label.grid(row=num_layers+2, column=1, columnspan=2)
+    # Add "Infinite" label to bottom of left column.
+    Label(layerinputframe, bg="gainsboro",
+          text="Infinite Thickness").grid(row=num_layers+2, column=1, columnspan=2)
 
     # thickness maximum values
-    thick_max_label = Label(layerinputframe, bg="gainsboro",
-                            text="Maximum\nValue", width=15)
-    thick_max_label.grid(row=2, column=2)
+    Label(layerinputframe, bg="gainsboro",
+          text="Maximum\nValue", width=15).grid(row=2, column=2)
     for i in range(num_layers - 1):
         thick_max_layer.append(IntVar(mainwindow))
         thick_max_data = Entry(
             layerinputframe, textvariable=thick_max_layer[i], width=10)
         thick_max_data.grid(row=i+3, column=2)
 
-    # thickness predictions
-    thick_pred_label = Label(layerinputframe, bg="gainsboro",
-                             text="Thickness\nPrediction", width=15)
-    thick_pred_label.grid(row=2, column=3)
-
-    # resistivity predictions
-    res_pred_label = Label(layerinputframe, bg="gainsboro",
-                           text="Resistivity\nPrediction", width=15)
-    res_pred_label.grid(row=2, column=4)
+    # thickness and resistivity prediction labels
+    Label(layerinputframe, bg="gainsboro",
+          text="Thickness\nPrediction", width=15).grid(row=2, column=3)
+    Label(layerinputframe, bg="gainsboro",
+          text="Resistivity\nPrediction", width=15).grid(row=2, column=4)
 
     # resistivity minimum values
-    res_min_label = Label(layerinputframe, bg="gainsboro",
-                          text="Minimum\nValue", width=15)
-    res_min_label.grid(row=2, column=6)
+    Label(layerinputframe, bg="gainsboro",
+          text="Minimum\nValue", width=15).grid(row=2, column=6)
     for i in range(num_layers):
         res_min_layer.append(IntVar(mainwindow))
         res_min_data = Entry(
@@ -407,9 +401,8 @@ def openGUI():
         res_min_data.grid(row=i+3, column=6)
 
     # resistivity maximum values
-    res_max_label = Label(layerinputframe, bg="gainsboro",
-                          text="Maximum\nValue", width=15)
-    res_max_label.grid(row=2, column=7)
+    Label(layerinputframe, bg="gainsboro",
+          text="Maximum\nValue", width=15).grid(row=2, column=7)
 
     for i in range(num_layers):
         res_max_layer.append(IntVar(mainwindow))
@@ -418,9 +411,8 @@ def openGUI():
         res_max_data.grid(row=i+3, column=7)
 
     # note while testing
-    note_label = Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 7),
-                       text="  --> For predictable results, enter 1 10 5 75 20 2 500 200 100 3000")
-    note_label.grid(row=8, column=1, columnspan=3, pady=5)
+    Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 7),
+          text="  --> For predictable results, enter 1 10 5 75 20 2 500 200 100 3000").grid(row=8, column=1, columnspan=3, pady=5)
 
     # ------------------ Buttons at the bottom ----------------------
 
