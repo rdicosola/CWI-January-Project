@@ -141,12 +141,12 @@ while fctr > 1.:
 
 def error():
     sumerror = 0.
-    #pltanswer = [0] * 64
+    # pltanswer = [0] * 64
     spline(m, one30, one30, asavl, rl, y2)
     for i in range(1, ndat, 1):
         ans = splint(m, adatl[i], asavl, rl, y2)
         sumerror = sumerror + (rdatl[i] - ans) * (rdatl[i] - ans)
-        #print(i, sum1, rdat[i], rdatl[i], ans)
+        # print(i, sum1, rdat[i], rdatl[i], ans)
         pltanswerl[i] = ans
         pltanswer[i] = np.power(10, ans)
     rms = np.sqrt(sumerror / (ndat-1))
@@ -155,10 +155,10 @@ def error():
 #    for i in range(1, m+1, 1):
 #        anstest = splint(m, asavl[i], asavl, rl, y2)
 #        print( asavl[i], rl[i], anstest)
-    #print(' rms  =  ', rms)
+    # print(' rms  =  ', rms)
 # if you erally want to get a good idea of all perdictions from Montecarlo
 # perform the following plot (caution - change iter to a smaller number)
-    #plt.loglog(adat[1:ndat], pltanswer[1:ndat])
+    # plt.loglog(adat[1:ndat], pltanswer[1:ndat])
 
     return rms
 
@@ -211,14 +211,14 @@ def rmsfit():
         sys.exit(-1)
 
     x = spac
-    #print("A-Spacing   App. Resistivity")
+    # print("A-Spacing   App. Resistivity")
     for i in range(1, m+1, 1):
         a = np.exp(x)
         asav[i] = a
         asavl[i] = np.log10(a)
         rl[i] = np.log10(r[i])
         x = x + delx
-        #print("%7.2f   %9.3f " % ( asav[i], r[i]))
+        # print("%7.2f   %9.3f " % ( asav[i], r[i]))
     rms = error()
     return rms
 
@@ -231,7 +231,7 @@ def spline(n, yp1, ypn, x=[], y=[], y2=[]):
 
     u = [0] * 1000
     one29 = 0.99e30
-    #print(x, y)
+    # print(x, y)
     if yp1 > one29:
         y2[0] = 0.
         u[0] = 0.
@@ -241,7 +241,7 @@ def spline(n, yp1, ypn, x=[], y=[], y2=[]):
                                        (x[1] - x[0]) - yp1)
 
     for i in range(1, n):
-        #print(i, x[i])
+        # print(i, x[i])
         sig = (x[i] - x[i - 1]) / (x[i + 1] - x[i - 1])
         p = sig * y2[i - 1] + 2.
         y2[i] = (sig - 1.) / p
@@ -274,12 +274,12 @@ def splint(n, x, xa=[], ya=[], y2a=[]):
     h = xa[khi] - xa[klo]
     if abs(h) < 1e-20:
         print(" bad xa input")
-    #print(x, xa[khi], xa[klo])
+    # print(x, xa[khi], xa[klo])
     a = (xa[khi] - x) / h
     b = (x - xa[klo]) / h
     y = (a * ya[klo] + b * ya[khi] + ((a * a * a - a) * y2a[klo] +
                                       (b * b * b - b) * y2a[khi]) * (h * h) / 6.)
-    #print("x=   ", x,"y=  ", y, "  ya=  ", ya[khi],"  y2a=  ", y2a[khi], "  h=  ",h)
+    # print("x=   ", x,"y=  ", y, "  ya=  ", ya[khi],"  y2a=  ", y2a[khi], "  h=  ",h)
     return y
 
 
@@ -297,10 +297,10 @@ def openGUI():
     global rdat
     global adat
     global ndat
-    global thick_min_layer
-    global thick_max_layer
-    global res_min_layer
-    global res_max_layer
+    global thick_min_layer, thick_min_entries
+    global thick_max_layer, thick_max_entries
+    global res_min_layer, res_min_entries
+    global res_max_layer, res_max_entries
     global layerinputframe
 
     # file explore button
@@ -368,25 +368,29 @@ def openGUI():
           text="Minimum\nValue", width=15).grid(row=2, column=1)
 
     thick_min_entries = []
-    for i in range(num_layers - 1):
+    # - 1 here because bottom layer has Infinite thickness
+    for i in range(MAX_LAYERS - 1):
         thick_min_layer.append(IntVar(mainwindow))
         thick_min_entries.append(Entry(
             layerinputframe, textvariable=thick_min_layer[i], width=10))
-        thick_min_entries[i].grid(row=i+3, column=1)
+
     # Add "Infinite" label to bottom of left column.
-    Label(layerinputframe, bg="gainsboro",
-          text="Infinite Thickness").grid(row=num_layers+2, column=1, columnspan=2)
+    # We store it in the thick_min_entries list so that when the number of
+    # layers changes, we can remap it.  BUT IT IS NOT AN ENTRY!
+    infinite_thickness_label = Label(layerinputframe, bg="gainsboro",
+                                     text="Infinite Thickness")
+    infinite_thickness_label.grid(row=num_layers+2, column=1, columnspan=2)
+    thick_min_entries.append(infinite_thickness_label)
 
     # thickness maximum values
     Label(layerinputframe, bg="gainsboro",
           text="Maximum\nValue", width=15).grid(row=2, column=2)
 
     thick_max_entries = []
-    for i in range(num_layers - 1):
+    for i in range(MAX_LAYERS - 1):
         thick_max_layer.append(IntVar(mainwindow))
         thick_max_entries.append(Entry(
             layerinputframe, textvariable=thick_max_layer[i], width=10))
-        thick_max_entries[i].grid(row=i+3, column=2)
 
     # thickness and resistivity prediction labels
     Label(layerinputframe, bg="gainsboro",
@@ -399,22 +403,22 @@ def openGUI():
           text="Minimum\nValue", width=15).grid(row=2, column=6)
 
     res_min_entries = []
-    for i in range(num_layers):
+    for i in range(MAX_LAYERS):
         res_min_layer.append(IntVar(mainwindow))
         res_min_entries.append(Entry(
             layerinputframe, textvariable=res_min_layer[i], width=10))
-        res_min_entries[i].grid(row=i+3, column=6)
 
     # resistivity maximum values
     Label(layerinputframe, bg="gainsboro",
           text="Maximum\nValue", width=15).grid(row=2, column=7)
 
     res_max_entries = []
-    for i in range(num_layers):
+    for i in range(MAX_LAYERS):
         res_max_layer.append(IntVar(mainwindow))
         res_max_entries.append(Entry(
             layerinputframe, textvariable=res_max_layer[i], width=10))
-        res_max_entries[i].grid(row=i+3, column=7)
+
+    displayChosenLayers(0, num_layers)
 
     # note while testing
     Label(layerinputframe, bg="gainsboro", font=("TkDefaultFont", 7),
@@ -439,8 +443,50 @@ def openGUI():
     plot_curves.grid(row=1, column=3, pady=5)
 
 
+def displayChosenLayers(old_num_layers, curr_num_layers):
+    assert old_num_layers != curr_num_layers
+
+    if old_num_layers < curr_num_layers:
+
+        # 0 for old_num_layers means we were not showing any layers before
+        # (the initial state). But, we have to interate from 0, so we
+        # change it to 1, so that in the loop, it is decremented to 0.
+        if old_num_layers == 0:
+            old_num_layers = 1
+
+        # More layers to be shown now.
+        # Show the entry boxes if the user has selected to see those layers
+        # subtract 1 from old_num_layers because indices start at 0
+        for i in range(old_num_layers - 1, curr_num_layers - 1):
+            thick_min_entries[i].grid(row=i+3, column=1)
+            thick_max_entries[i].grid(row=i+3, column=2)
+        for i in range(old_num_layers - 1, curr_num_layers):
+            res_min_entries[i].grid(row=i+3, column=6)
+            res_max_entries[i].grid(row=i+3, column=7)
+
+    else:
+        # fewer layers to be shown now: use grid_forget() to un-display them
+        for i in range(old_num_layers - 2, curr_num_layers - 2, -1):
+            thick_min_entries[i].grid_forget()
+            thick_max_entries[i].grid_forget()
+        for i in range(old_num_layers - 1, curr_num_layers - 1, -1):
+            res_min_entries[i].grid_forget()
+            res_max_entries[i].grid_forget()
+
+    # Move the "Infinite Thickness" label
+    inf_thickness_label = thick_min_entries[MAX_LAYERS - 1]
+    inf_thickness_label.grid(row=curr_num_layers+2, column=1, columnspan=2)
+
+
 def numLayersChanged(*args):
-    print("numlayers changed. Now: ", num_layers_var.get())
+    global curr_num_layers
+
+    new_num_layers = num_layers_var.get()
+    if new_num_layers != curr_num_layers:
+        print(f"num_layers changed from {curr_num_layers} to {new_num_layers}")
+        displayChosenLayers(curr_num_layers, new_num_layers)
+    # Store new value as current value
+    curr_num_layers = new_num_layers
 
 
 def pickFile():
@@ -456,11 +502,10 @@ def pickFile():
     global ndat
 
     # get file
-    resistivity_file = \
-        filedialog.askopenfilename(initialdir="/",
-                                   title="Open File",
-                                   filetypes=(("Text Files", "*.txt"),
-                                              ("All Files", "*.*")))
+    resistivity_file = filedialog.askopenfilename(initialdir="/",
+                                                  title="Open File",
+                                                  filetypes=(("Text Files", "*.txt"),
+                                                             ("All Files", "*.*")))
 
     # set label by file button to resistivity file link
     file_view.config(text=resistivity_file)
@@ -566,14 +611,14 @@ def executeVES():
 
     print(adat[1:ndat], rdat[1:ndat])
     for iloop in range(1, iter + 1, 1):
-        #print( '  iloop is ', iloop)
+        # print( '  iloop is ', iloop)
         for i in range(1, num_layers + 1):
             randNumber = random.random()
-            #print(randNumber, '  random')
+            # print(randNumber, '  random')
             p[i] = (xlarge[i] - small[i]) * randNumber + small[i]
         for i in range(num_layers + 1, n + 1):
             randNumber = random.random()
-            #print(randNumber, '  random')
+            # print(randNumber, '  random')
             p[i] = (xlarge[i] - small[i]) * randNumber + small[i]
 
         rms = rmsfit()
@@ -603,7 +648,7 @@ def executeVES():
     print(' RMS error   ', errmin)
     print('  Spacing', '  Res_pred  ', ' Log10_spacing  ', ' Log10_Res_pred ')
     for i in range(1, m + 1, 1):
-        #print(asav[i], rkeep[i], asavl[i], rkeepl[i])
+        # print(asav[i], rkeep[i], asavl[i], rkeepl[i])
         print("%7.2f   %9.3f  %9.3f  %9.3f" % (asav[i], rkeep[i],
                                                asavl[i], rkeepl[i]))
 
