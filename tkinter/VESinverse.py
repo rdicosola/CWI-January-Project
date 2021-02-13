@@ -10,7 +10,6 @@
 
 # GUI Implementation Additions
 # Created Winter 2021
-
 # @author: Rebecca DiCosola
 # @author: Victor Norman
 
@@ -53,6 +52,10 @@ SCHLUMBERGER = 1
 WENNER = 2
 
 
+ONE_E30 = 1.e30
+ONE29 = 0.99e30
+DELX = np.log(10.0) / 6.
+
 # I know there must be a better method to assign lists. And probably numpy
 # arrays would be best. But my Python wasn't up to it. If the last letter
 # is an 'l' that means it is a log10 of the value
@@ -74,9 +77,6 @@ pltanswer = [0] * ARRAYSIZE
 pltanswerl = [0] * ARRAYSIZE
 pltanswerkeep = [0] * ARRAYSIZE
 pltanswerkeepl = [0] * ARRAYSIZE
-
-small = [0] * ARRAYSIZE
-xlarge = [0] * ARRAYSIZE
 
 x = [0] * 100
 y = [0] * 100
@@ -118,15 +118,13 @@ iter = 10000  # number of iterations for the Monte Carlo guesses. to be input on
 ndat = 13
 # adat = [0., 0.55, 0.95, 1.5, 2.5, 3., 4.5, 5.5, 9., 12., 20., 30., 70.]
 # rdat = [0., 125., 110., 95., 40., 24., 15., 10.5, 8., 6., 6.5, 11., 25.]
-one30 = 1.e30
-rms = one30
+rms = ONE_E30
 errmin = 1.e10
 
 spac = 0.2  # smallest electrode spacing
 m = 20  # number of points where resistivity is calculated
 
 spac = np.log(spac)
-delx = np.log(10.0) / 6.
 
 # these lines apparently find the computer precision ep
 ep = 1.0
@@ -142,8 +140,8 @@ while fctr > 1.:
 def error():
     sumerror = 0.
     # pltanswer = [0] * 64
-    spline(m, one30, one30, asavl, rl, y2)
-    for i in range(1, ndat, 1):
+    spline(m, ONE_E30, ONE_E30, asavl, rl, y2)
+    for i in range(1, ndat):
         ans = splint(m, adatl[i], asavl, rl, y2)
         sumerror = sumerror + (rdatl[i] - ans) * (rdatl[i] - ans)
         # print(i, sum1, rdat[i], rdatl[i], ans)
@@ -152,7 +150,7 @@ def error():
     rms = np.sqrt(sumerror / (ndat-1))
 
     # check the spline routine
-#    for i in range(1, m+1, 1):
+#    for i in range(1, m+1):
 #        anstest = splint(m, asavl[i], asavl, rl, y2)
 #        print( asavl[i], rl[i], anstest)
     # print(' rms  =  ', rms)
@@ -166,7 +164,7 @@ def error():
 def transf(y, i):
     u = 1. / np.exp(y)
     t[1] = p[n]
-    for j in range(2, num_layers+1, 1):
+    for j in range(2, num_layers+1):
         pwr = -2. * u * p[num_layers+1-j]
         if pwr < np.log(2. * ep):
             pwr = np.log(2. * ep)
@@ -188,23 +186,23 @@ def filters(b, k):
 
 def rmsfit():
     if algorithm_choice == SCHLUMBERGER:
-        y = spac - 19. * delx - 0.13069
+        y = spac - 19. * DELX - 0.13069
         mum1 = m + 28
-        for i in range(1, mum1 + 1, 1):
+        for i in range(1, mum1 + 1):
             transf(y, i)
-            y = y + delx
+            y = y + DELX
         filters(FLTR1, 29)
     elif algorithm_choice == WENNER:
         s = np.log(2.)
-        y = spac-10.8792495 * delx
+        y = spac-10.8792495 * DELX
         mum2 = m + 33
-        for i in range(1, mum2 + 1, 1):
+        for i in range(1, mum2 + 1):
             transf(y, i)
             a = r[i]
             y1 = y + s
             transf(y1, i)
             r[i] = 2. * a - r[i]
-            y = y + delx
+            y = y + DELX
         filters(FLTR2, 34)
     else:
         print("type of survey not indicated")
@@ -212,12 +210,12 @@ def rmsfit():
 
     x = spac
     # print("A-Spacing   App. Resistivity")
-    for i in range(1, m+1, 1):
+    for i in range(1, m+1):
         a = np.exp(x)
         asav[i] = a
         asavl[i] = np.log10(a)
         rl[i] = np.log10(r[i])
-        x = x + delx
+        x = x + DELX
         # print("%7.2f   %9.3f " % ( asav[i], r[i]))
     rms = error()
     return rms
@@ -230,9 +228,8 @@ def spline(n, yp1, ypn, x=[], y=[], y2=[]):
     to prediction'''
 
     u = [0] * 1000
-    one29 = 0.99e30
     # print(x, y)
-    if yp1 > one29:
+    if yp1 > ONE29:
         y2[0] = 0.
         u[0] = 0.
     else:
@@ -249,7 +246,7 @@ def spline(n, yp1, ypn, x=[], y=[], y2=[]):
                        (y[i] - y[i - 1]) / (x[i] - x[i - 1])) /
                  (x[i + 1] - x[i - 1]) - sig * u[i - 1]) / p)
 
-    if ypn > one29:
+    if ypn > ONE29:
         qn = 0.
         un = 0.
     else:
@@ -288,20 +285,18 @@ def openGUI():
     global num_layers
     global n
     global iter
-    global ndat
     global file_explore
     global file_view
-    global resistivity_file
-    global file_content
     global algorithm_index
-    global rdat
-    global adat
-    global ndat
     global thick_min_layer, thick_min_entries
     global thick_max_layer, thick_max_entries
     global res_min_layer, res_min_entries
     global res_max_layer, res_max_entries
     global layerinputframe
+
+    global computed_results_labels
+
+    computed_results_labels = []
 
     # file explore button
     preframe = Frame(mainwindow, background="gainsboro")
@@ -475,6 +470,13 @@ def displayChosenLayers(old_num_layers, curr_num_layers):
 
 def numLayersChanged(*args):
     global curr_num_layers
+    global computed_results_labels
+
+    # Clear displayed results
+    if computed_results_labels != []:
+        for l in computed_results_labels:
+            l.grid_forget()
+    computed_results_labels = []
 
     new_num_layers = num_layers_var.get()
     if new_num_layers != curr_num_layers:
@@ -485,13 +487,9 @@ def numLayersChanged(*args):
 
 
 def pickFile():
-    global file_explore
     global file_view
-    global resistivity_file
-    global file_content
-    global algorithm_index
-    global file_list
     global algorithm_choice
+
     global adat
     global rdat
     global ndat
@@ -538,6 +536,8 @@ def pickFile():
     # number of data values
     ndat = len(file_list) - 2
 
+    # TODO: do we handle files with the ending line of 0 0 ? Should we?
+
     # compute log10 values of adat and rdat
     # TODO: the values in adatl and rdatl are indexed starting a 1: yuck!
     # TODO: we don't convert adat[0] or rdat[0]... correct?
@@ -549,7 +549,7 @@ def pickFile():
 # def readData():
 #     # normally this is where the data would be read from the csv file
 #     # but now I'm just hard coding it in as global lists
-#     for i in range(1, ndat, 1):
+#     for i in range(1, ndat):
 #         adatl[i] = np.log10(adat[i])
 #         print(adatl[i])
 #         rdatl[i] = np.log10(rdat[i])
@@ -566,8 +566,6 @@ def computePredictions():
     global num_layers
     global num_layers_var
     global n
-    global small
-    global xlarge
     global thick_min_layer
     global thick_max_layer
     global res_min_layer
@@ -584,8 +582,13 @@ def computePredictions():
     global rkeep
     global rkeepl
     global pltanswerkeep
-    global plt
-    global sys
+
+    # TODO: + 1 here because we are using 1-based arrays.
+    small = [0] * (MAX_LAYERS + 1)
+    xlarge = [0] * (MAX_LAYERS + 1)
+
+# Turn off randomization
+    random.seed(0)
 
     # set number of iterations
     iter = num_iter.get()
@@ -604,8 +607,12 @@ def computePredictions():
     for i in range(num_layers):
         xlarge[i + num_layers] = res_max_layer[i].get()
 
-    print(adat[1:ndat], rdat[1:ndat])
-    for iloop in range(1, iter + 1, 1):
+    print('computePredictions: small = ', small)
+    print('                    xlarge = ', xlarge)
+
+    print('adat: ', adat)
+    print('rdat: ', rdat)
+    for iloop in range(1, iter + 1):
         # print( '  iloop is ', iloop)
         for i in range(1, num_layers + 1):
             randNumber = random.random()
@@ -642,7 +649,7 @@ def computePredictions():
     # output the error of fit
     print(' RMS error   ', errmin)
     print('  Spacing', '  Res_pred  ', ' Log10_spacing  ', ' Log10_Res_pred ')
-    for i in range(1, m + 1, 1):
+    for i in range(1, m + 1):
         # print(asav[i], rkeep[i], asavl[i], rkeepl[i])
         print("%7.2f   %9.3f  %9.3f  %9.3f" % (asav[i], rkeep[i],
                                                asavl[i], rkeepl[i]))
@@ -663,39 +670,51 @@ def viewModel():
     global pkeep
     global num_layers
     global n			# 2 * num_layers - 1
+    global computed_results_labels
+
+    # we've displayed labels before, so remove them now from the display
+    # if computed_results_labels != []:
+    #     for l in computed_results_labels:
+    #         l.grid_forget()
 
     for i in range(1, num_layers):
         print(i, pkeep[i], pkeep[num_layers + i - 1])
         thickness_label = Label(
             layerinputframe, bg="gainsboro", text=str(round(pkeep[i], NDIGITS)))
         thickness_label.grid(row=2+i, column=3)
-        thickness_label = Label(
+        computed_results_labels.append(thickness_label)
+        resistivity_label = Label(
             layerinputframe, bg="gainsboro", text=str(round(pkeep[num_layers + i - 1], NDIGITS)))
-        thickness_label.grid(row=2+i, column=4)
+        resistivity_label.grid(row=2+i, column=4)
+        computed_results_labels.append(resistivity_label)
 
     thickness_label = Label(
         layerinputframe, bg="gainsboro", text="Infinite")
     thickness_label.grid(row=2+num_layers, column=3)
-    thickness_label = Label(
+    computed_results_labels.append(thickness_label)
+
+    resistivity_label = Label(
         layerinputframe, bg="gainsboro", text=str(round(pkeep[n], NDIGITS)))
-    thickness_label.grid(row=2+num_layers, column=4)
+    resistivity_label.grid(row=2+num_layers, column=4)
+    computed_results_labels.append(resistivity_label)
+
+    errmin_label = Label(
+        layerinputframe, bg="gainsboro", text=f"RMS error of Fit = {round(errmin, NDIGITS)}")
+    errmin_label.grid(row=3+num_layers, column=3, columnspan=2)
+    computed_results_labels.append(errmin_label)
 
 
 # when plotCurves button pressed, plotCurves executes
 def plotCurves():
-    global plt
-    global sys
 
     # show graph
     plt.show()
     plt.grid(True)
-    sys.exit(0)
 
 
 # Main
 if __name__ == '__main__':
     # Seed the RNG so we don't have randomness while testing
-    random.seed(0)
     # GUI initialization
     mainwindow = Tk()
     mainwindow.title('VES Inverse Monte Carlo')
